@@ -20,17 +20,41 @@ Pretest
 
 2) Write a short R script to add all numbers from 1 to 100 using a for loop.
 
+```{r}
+s <- 0
+for(i in 1:100)
+  s <- s + i
+```
+
 3) Repeat problem 2 using only one line of code (i.e. without using a for loop).
+
+```{r}
+sum(1:100)
+```
 
 4) Given the data.frame, *dat*, with the variables {*x1*, *x2*, *x3*, *y*}, write the R command to create a linear model for *y* using *x1*, *x2* and *x3* as predictors.
 
+`lm(y ~ x1 + x2 + x3, data = dat)`
+
 5) Write an R command to plot the relationship between *x1* and *y*.
+
+`plot(x1, y, bty = 'l')`
 
 6) Given the relationship between *x1* and *y* in this figure, update the R command in question 4 with a more appropriate model.
 
+`dat$x1sqr <- dat$x1^2`
+`lm(y ~ x1 + x1sqr + x2 + x3)`
+
 7) A collaborator presents a data analysis to you. The p-value they give you is p = 0.012. Is this statistically significant?
 
+Yes
+
 8) After discussing the results further, you discover that this p-value represents just one of 20 tests performed in the analysis. What is the Bonferroni threshold for significance if you want the family-wise error rate to be alpha = 0.05? Is the result statistically significant?
+
+```{r}
+(thresh <- 0.05 / 20)
+```
+No
   
 9) What assumptions are made in a simple linear regression? What R command(s) can you use to get a quick look at whether those assumptions have been violated?
    - Linear relationship
@@ -44,8 +68,7 @@ Pretest
        - car package
        - gvlma package
 
-10) Explain the relationship between confidence intervals and p-values.
-  - Why are confidence intervals more useful than p-values?
+10) Explain the relationship between confidence intervals and p-values. Why are confidence intervals more useful than p-values?
 
 
 Discussion of R programming basics
@@ -66,6 +89,8 @@ Discussion of R programming basics
     - lists
     - data.frames
     - (tibble)
+
+### Lecture notes are located in the course repository
 
 - Examples of vector calculations
 ```{r vector calculations}
@@ -120,4 +145,4 @@ fx <- function(x)
 plot(lst[[3]], fx(lst[[3]]))
 ```
 
-Questions?
+## Questions?
