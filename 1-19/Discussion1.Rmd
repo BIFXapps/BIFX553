@@ -1,0 +1,123 @@
+---
+title: "Discussion 1"
+author: "Randy Johnson"
+date: "January 17, 2017"
+output:
+  pdf_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
+```
+
+BIFX 553 Discussion 1: January 19, 2017
+=======================================
+
+Pretest
+-------
+
+1) What is a p-value?
+
+2) Write a short R script to add all numbers from 1 to 100 using a for loop.
+
+3) Repeat problem 2 using only one line of code (i.e. without using a for loop).
+
+4) Given the data.frame, *dat*, with the variables {*x1*, *x2*, *x3*, *y*}, write the R command to create a linear model for *y* using *x1*, *x2* and *x3* as predictors.
+
+5) Write an R command to plot the relationship between *x1* and *y*.
+
+6) Given the relationship between *x1* and *y* in this figure, update the R command in question 4 with a more appropriate model.
+
+7) A collaborator presents a data analysis to you. The p-value they give you is p = 0.012. Is this statistically significant?
+
+8) After discussing the results further, you discover that this p-value represents just one of 20 tests performed in the analysis. What is the Bonferroni threshold for significance if you want the family-wise error rate to be alpha = 0.05? Is the result statistically significant?
+  
+9) What assumptions are made in a simple linear regression? What R command(s) can you use to get a quick look at whether those assumptions have been violated?
+   - Linear relationship
+   - Multivariate Normality
+   - No/little multicollinearity
+   - No autocorrelation
+   - Homoscedasticity
+   - General lm diagnostics
+       - plot()
+       - broom package
+       - car package
+       - gvlma package
+
+10) Explain the relationship between confidence intervals and p-values.
+  - Why are confidence intervals more useful than p-values?
+
+
+Discussion of R programming basics
+----------------------------------
+
+- What data types does R have?
+    - numeric
+      - integer
+      - double
+    - character
+    - factor
+
+- What are the standard data structures in R? How are they indexed?
+    - scalar
+    - vector
+    - matrix
+    - array
+    - lists
+    - data.frames
+    - (tibble)
+
+- Examples of vector calculations
+```{r vector calculations}
+x <- 1:10
+y <- rnorm(10)
+x + y
+```
+
+```{r the apply family}
+mat <- cbind(x, y)
+apply(mat, 1, sum)
+
+lst <- list(rnorm(100),
+            rnorm(100, 5),
+            rnorm(100, 5, 10))
+sapply(lst, mean)
+lapply(lst, mean)
+```
+
+```{r ifelse example}
+ifelse(y > 0, 1, -1)
+```
+
+- Examples of control structures
+```{r if else}
+test <- TRUE
+if(test)
+{
+  print("This is executed when test is true.")
+}else{
+  print("This is executed when test is false.")
+}
+```
+
+```{r for loop}
+for(i in 1:2)
+{
+  hist(lst[[i]])
+}
+```
+
+  - There are other control structures, but you shouldn't need them very often (if ever).
+  
+- Functions
+```{r example function}
+fx <- function(x)
+{
+  # do something here and return a value
+  return(5 + 2*x - 4*x^2 + x^3/5)
+}
+
+plot(lst[[3]], fx(lst[[3]]))
+```
+
+Questions?

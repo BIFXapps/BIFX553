@@ -1,2 +1,4 @@
-.pages
+*.pages
 *~
+*_files
+*_cache
