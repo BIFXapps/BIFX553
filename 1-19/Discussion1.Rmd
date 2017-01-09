@@ -49,7 +49,7 @@ sum(1:100)
 
 Yes
 
-8) After discussing the results further, you discover that this p-value represents just one of 20 tests performed in the analysis. What is the Bonferroni threshold for significance if you want the family-wise error rate to be alpha = 0.05? Is the result statistically significant?
+8) After discussing the results further, you discover that this p-value represents just one of 20 tests performed in the analysis. What is the Bonferroni threshold for significance if you want the family-wise error rate to be $\alpha = 0.05$? Is the result statistically significant?
 
 ```{r}
 (thresh <- 0.05 / 20)
