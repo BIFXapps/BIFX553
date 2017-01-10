@@ -1,0 +1,145 @@
+---
+title: "BIFX 553 - Discussion 2"
+author: "Randy Johnson"
+date: "January 26, 2017"
+output:
+  pdf_document: default
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
+```
+
+Linear Regression
+=================
+
+Why use Linear Models?
+----------------------
+
+- Hypothesis Testing
+- Estimation
+- Prediction
+
+### Hypothesis Testing
+
+### Estimation
+
+
+### Prediction
+
+Planning
+--------
+
+
+Notation and Formulation
+------------------------
+
+
+Interpretation of Model Parameters
+----------------------------------
+
+### Nominal
+
+### Categorical
+
+### Interactions
+
+
+Assessing Model Fit and Assumptions
+-----------------------------------
+
+### Regression Assumptions
+We will primarily use visual inspection and the `broom` package for checking regression assumpitions, but there are many other resources in R to do this (e.g. the `car` and `gvlma` packages).
+
+- Linear relationship
+- Multivariate Normality
+- No/little multicollinearity
+- No autocorrelation
+- Homoscedasticity
+
+
+### Modeling and testing complex interactions
+
+### Fitting ordinal predictors
+
+### Distribution assumptions
+
+
+Tests of Association
+--------------------
+
+### Single parameter
+
+### Multiple degree of freedom tests
+
+
+Dealing with Non-linearity
+--------------------------
+
+### Simple non-linear terms
+
+### Splines
+
+### Non-parametric regression
+
+
+Missing Data
+------------
+
+### Types of missing data
+
+- Missing completely at random
+- Missing at random
+- Informative missing
+
+### Problems stemming from missing data
+
+### Imputation
+
+Mulivariable Modeling Strategies
+--------------------------------
+
+### Prespecification of predictor complexity
+
+### Variable selection
+
+### Overfitting and shrinkage
+
+### Collinearity
+
+### Data reduction
+
+### Overly influential variables
+
+### Comparing two models
+
+### Summary
+- Developing predictive modeling strategies
+- Developing models for effect estimation
+- Developing models for hypothesis testing
+
+Binary Logistic Regression
+--------------------------
+
+### Model assumptions
+- Assessment of model fit
+- Collinearity
+- Overly influential variables
+
+### Odds ratio, Risk ratio and Risk difference
+- Definition
+- Interpretation of model parameters
+
+### Estimation, test statistics, residuals
+
+### Quantifying predictive ability
+
+### Validating the predictive ability
+
+### Describing the model
+
+
+Ordinal Logistic Regression
+---------------------------
+
+### Proportional odds model

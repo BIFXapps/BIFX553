@@ -1,5 +1,5 @@
 ---
-title: "Discussion 1"
+title: "BIFX 553 - Discussion 1"
 author: "Randy Johnson"
 date: "January 17, 2017"
 output:
@@ -10,8 +10,8 @@ output:
 knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
 ```
 
-BIFX 553 Discussion 1: January 19, 2017
-=======================================
+BIFX 552 Review and R Tips 'n Tricks
+====================================
 
 Pretest
 -------
