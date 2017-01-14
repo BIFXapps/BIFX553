@@ -1,7 +1,7 @@
 ---
 title: "BIFX 553 - Discussion 1"
 author: "Randy Johnson"
-date: "January 17, 2017"
+date: "January 19, 2017"
 output:
   pdf_document: default
 ---
@@ -12,6 +12,8 @@ knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
 
 BIFX 552 Review and R Tips 'n Tricks
 ====================================
+
+[//]: # \textcolor{red}{Start here after reviewing the syllabus.}
 
 Pretest
 -------
@@ -64,33 +66,75 @@ No
    - Homoscedasticity
    - General lm diagnostics
        - plot()
-       - broom package
        - car package
        - gvlma package
 
 10) Explain the relationship between confidence intervals and p-values. Why are confidence intervals more useful than p-values?
 
 
+Git / GitHub
+------------
+
+- Lecture notes are located in the [course repository](https://github.com/johnsonra/BIFX553).
+- For more information on using Git from the command line, you can access a tutorial/presentation I gave last year [here](https://docs.google.com/document/d/1i6LHC_M3FBWgM4Ktew24EwmKf-QORmnbm2EK2q7jsF4/edit?usp=sharing) along with a [list of comands](https://docs.google.com/document/d/1h3PcEFt6WiY5_NNQW2ZnAen1s5noQpuTBuj8jdDq8TU/edit) that accompanied the presenation. There are numerous other tutorials, best practices and answers to questions on the [Atlassian tutorials page](https://www.atlassian.com/git/tutorials/).
+- We will use git to share course materials and submit some homework assignments.
+
+
+### SourceTree
+
+I recommend using [SourceTree](https://www.sourcetreeapp.com/) to manage your git repositories. It can do nearly everything you might want to do on the command line, and is a more user-friendly way to enter the world of Git.
+
+[//]: # \textcolor{red}{Review SNPcorrelation and CCBR-Commons repos. Followed by demonstration committing and pushing something on the BIFX 553 repo.}
+
+- Pulling: repository updates must be pulled down from the git server! Git will never presume that you want to apply someone else's updates to your local copy of the repository. This could end very badly if you have uncommitted changes you are working on.
+
+- Committing: when you have changes you want to put up on the git server for the world (or perhaps just your development team) to see, you need to commit them.
+    - Choose the changes you want to commit
+    - Write a description of the changes you made (make the first line *short*, followed by additional text if you would like)
+    - Commit away!
+
+- Pushing: like pulling, your commits need to be pushed to the git server, or no one will ever know about them! Git will never presume that you are ready to share your commits with others until you tell it to do so.
+
+- Forking: if you see a repository you would like to make your own, fork it! Not only will you be able to put your own stamp on the repository, but you can issue a pull request to the owner if you have something you think they would like to implement in their version. You will be notified of any commits they push as well, which you can apply to your version (or not) as you wish.
+
+#### Assignment
+Create a GitHub account (if you don't already have one) and fork the course repository before class next week.
+
+[//]: # \textcolor{red}{Until you have your own copy of the repository, you may want to download the notes for today's discussion along with the R code we will be reviewing.}
+[//]: # \textcolor{red}{Go to https://github.com/johnsonra/BIFX553 -> 1-19. Download *Discussion1.R*}
+
+
 Discussion of R programming basics
 ----------------------------------
 
 - What data types does R have?
-    - numeric
-      - integer
-      - double
-    - character
-    - factor
+
+[//]: #     - numeric
+[//]: #         - integer
+[//]: #         - double
+[//]: #     - character
+[//]: #     - factor
 
 - What are the standard data structures in R? How are they indexed?
-    - scalar
-    - vector
-    - matrix
-    - array
-    - lists
-    - data.frames
-    - (tibble)
 
-### Lecture notes are located in the course repository
+[//]: #     - scalar: not indexed
+[//]: #     - vector: indexed with `[`
+[//]: #         - `vec[i]`
+[//]: #         - `vec[1:10]`
+[//]: #     - matrix: indexed with `[`
+[//]: #         - `mat[i,j]`
+[//]: #         - `mat[,j]`
+[//]: #     - array: indexed with `[`
+[//]: #         - `ary[i,j,k]`
+[//]: #         - `ary[i,-1,k]`
+[//]: #     - list: indexed with `[[`, `$` or `[`
+[//]: #         - `lst[[i]]`
+[//]: #         - `lst$named_element`
+[//]: #         - `lst[j]` (Don't use this!)
+[//]: #     - data.frame: Data frames are essentially lists of vectors that is forced to be rectangular. indexed with `$` or `[[`
+[//]: #         - `dat$named_element`
+[//]: #         - `dat[['named_element']]`
+[//]: #     (- tibble: Tibbles are a "reimagining" of the data.frame, that can contain things other than just vectors (e.g. one column of a tibble could be a list, as long as it has a number of rows consistent with the rest of the columns of the tibble). More on these later. Indexed with `$` or `[[`.)
 
 - Examples of vector calculations
 ```{r vector calculations}
@@ -145,4 +189,6 @@ fx <- function(x)
 plot(lst[[3]], fx(lst[[3]]))
 ```
 
-## Questions?
+## Questions up to this point?
+
+What would you like to learn to do in R?
