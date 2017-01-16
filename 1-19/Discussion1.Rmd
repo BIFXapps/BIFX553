@@ -192,3 +192,11 @@ plot(lst[[3]], fx(lst[[3]]))
 ## Questions up to this point?
 
 What would you like to learn to do in R?
+
+## Homework
+
+- Create a GitHub account if you don't already have one and fork the class repository.
+- Create a Gist with a randomly generated dataset containing 100 rows with the following variables:
+    - x = rnorm(100)
+    - y = x + rnorm(100)
+- Create a graphic showing the regression line and confidence region using `ggplot`. Email me for hints if you get stuck.
