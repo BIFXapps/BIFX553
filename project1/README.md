@@ -42,6 +42,6 @@ Rubric
 |     | Conclusion | 5 |
 |     | Major concerns | 15 |
 |     | Minor concerns | 5 |
-| *Response to Reviewers | | **20** |
+| *Response to Reviewers* | | **20** |
 |     | Concerns addressed | 10 | 
 |     | Justifications | 10 |
