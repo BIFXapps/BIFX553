@@ -32,11 +32,12 @@ Rubric
 | *Manuscript* | | **60** |
 |     | Fails plagerism check | -30 |
 |     | Abstract | 10 |
-|     | Introduction | 10 |
+|     | Introduction | 5 |
 |     | Methods | 10 |
 |     | Results | 10 | 
 |     | Discussion | 10 |
 |     | Conclusion | 10 |
+|     | References | 5 |
 | *Peer Review* | | **20** | 
 |     | Conclusion | 5 |
 |     | Major concerns | 15 |
