@@ -22,14 +22,13 @@ Rubric
 |     | Balanced effort | 25 |
 |     | Contributions documented | 15 |
 | *Analysis* | | **60** |
-|     | Readable code | 7 |
-|     | Neat repository | 7 |
-|     | Appropriate comments | 7 |
-|     | Assumptions checked | 8 |
-|     | Statistical Model(s) | 7 | 
-|     | Multiple comparisons | 8 |
-|     | Meta analysis | 7 |
-|     | Results | 9 |
+|     | Neat repository | 5 |
+|     | Readable code/comments | 5 |
+|     | Assumptions checked | 10 |
+|     | Statistical Model(s) | 10 | 
+|     | Multiple comparisons | 10 |
+|     | Meta analysis | 10 |
+|     | Results | 10 |
 | *Standard structure for a scientific paper* | | **60** |
 |     | Fails plagerism check | -30 |
 |     | Abstract | 10 |
