@@ -29,7 +29,7 @@ Rubric
 |     | Multiple comparisons | 10 |
 |     | Meta analysis | 10 |
 |     | Results | 10 |
-| *Standard structure for a scientific paper* | | **60** |
+| *Manuscript* | | **60** |
 |     | Fails plagerism check | -30 |
 |     | Abstract | 10 |
 |     | Introduction | 10 |
