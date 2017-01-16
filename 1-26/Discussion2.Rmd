@@ -125,6 +125,7 @@ gbsg <- as_data_frame(gbsg) %>%
          hormon = as.character(hormon),
          d = as.integer(d),
          t = as.double(t))
+save(gbsg, file = 'gbsg.RData')
 ```
 
 ```{r first model, include = FALSE}
