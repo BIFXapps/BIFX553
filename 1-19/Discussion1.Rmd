@@ -97,44 +97,38 @@ I recommend using [SourceTree](https://www.sourcetreeapp.com/) to manage your gi
 
 - Forking: if you see a repository you would like to make your own, fork it! Not only will you be able to put your own stamp on the repository, but you can issue a pull request to the owner if you have something you think they would like to implement in their version. You will be notified of any commits they push as well, which you can apply to your version (or not) as you wish.
 
-#### Assignment
-Create a GitHub account (if you don't already have one) and fork the course repository before class next week.
-
-[//]: # \textcolor{red}{Until you have your own copy of the repository, you may want to download the notes for today's discussion along with the R code we will be reviewing.}
-[//]: # \textcolor{red}{Go to https://github.com/johnsonra/BIFX553 -> 1-19. Download *Discussion1.R*}
-
 
 Discussion of R programming basics
 ----------------------------------
 
 - What data types does R have?
 
-[//]: #     - numeric
-[//]: #         - integer
-[//]: #         - double
-[//]: #     - character
-[//]: #     - factor
+     - numeric
+         - integer
+         - double
+     - character
+     - factor
 
 - What are the standard data structures in R? How are they indexed?
 
-[//]: #     - scalar: not indexed
-[//]: #     - vector: indexed with `[`
-[//]: #         - `vec[i]`
-[//]: #         - `vec[1:10]`
-[//]: #     - matrix: indexed with `[`
-[//]: #         - `mat[i,j]`
-[//]: #         - `mat[,j]`
-[//]: #     - array: indexed with `[`
-[//]: #         - `ary[i,j,k]`
-[//]: #         - `ary[i,-1,k]`
-[//]: #     - list: indexed with `[[`, `$` or `[`
-[//]: #         - `lst[[i]]`
-[//]: #         - `lst$named_element`
-[//]: #         - `lst[j]` (Don't use this!)
-[//]: #     - data.frame: Data frames are essentially lists of vectors that is forced to be rectangular. indexed with `$` or `[[`
-[//]: #         - `dat$named_element`
-[//]: #         - `dat[['named_element']]`
-[//]: #     (- tibble: Tibbles are a "reimagining" of the data.frame, that can contain things other than just vectors (e.g. one column of a tibble could be a list, as long as it has a number of rows consistent with the rest of the columns of the tibble). More on these later. Indexed with `$` or `[[`.)
+     - scalar: not indexed
+     - vector: indexed with `[`
+         - `vec[i]`
+         - `vec[1:10]`
+     - matrix: indexed with `[`
+         - `mat[i,j]`
+         - `mat[,j]`
+     - array: indexed with `[`
+         - `ary[i,j,k]`
+         - `ary[i,-1,k]`
+     - list: indexed with `[[`, `$` or `[`
+         - `lst[[i]]`
+         - `lst$named_element`
+         - `lst[j]` (Don't use this!)
+     - data.frame: Data frames are essentially lists of vectors that is forced to be rectangular. indexed with `$` or `[[`
+         - `dat$named_element`
+         - `dat[['named_element']]`
+     - tibble: Tibbles are a "reimagining" of the data.frame, that can contain things other than just vectors (e.g. one column of a tibble could be a list, as long as it has a number of rows consistent with the rest of the columns of the tibble). More on these later. Indexed with `$` or `[[`.
 
 - Examples of vector calculations
 ```{r vector calculations}
