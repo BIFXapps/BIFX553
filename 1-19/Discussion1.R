@@ -22,24 +22,47 @@ thresh <- 0.05 / 20
 
 ##### Vector Calculations #####
 
+# these are vectors
 x <- 1:10
 y <- rnorm(10)
+
+# adding vectors
 x + y
 
+# a data frame
+dat <- data.frame(x = rnorm(100),
+                  y = rnorm(100))
 
-# The apply family
+# lets add a new variable to our data.frame
+dat$sex <- sample(c('M', 'F'), 
+                  size = 190, 
+                  replace = TRUE)
+
+
+
+# this is a matrix
 mat <- cbind(x, y)
+
+# The apply family "applys" a function to vectors or lists of data
+# compute column sum of mat
+apply(mat, 2, sum)
+
+# compute row sum of mat
 apply(mat, 1, sum)
 
-lst <- list(rnorm(100),
-            rnorm(100, 5),
-            rnorm(100, 5, 10))
-sapply(lst, mean)
-lapply(lst, mean)
+# this is a list
+lst <- list(x = rnorm(100),
+            y = rnorm(100, 5),
+            z = rnorm(100, 5, 10))
+
+# apply the mean function to each element in our list
+sapply(lst, mean) # sapply returns a vector if possible
+
+lapply(lst, mean) # lapply returns a list
 
 
 # ifelse
-ifelse(y > 0, 1, -1)
+ifelse(dat$y > 0, 1, -1)
 
 
 ##### Control Structures #####
@@ -55,7 +78,7 @@ if(test)
 
 
 # for loop
-for(i in 1:2)
+for(i in 1:3)
 {
   hist(lst[[i]])
 }
@@ -78,7 +101,8 @@ plot(lst[[3]], fx(lst[[3]]))
 
 ##### tibble #####
 
-tdf <- tibble(x = 1:1e4, y = rnorm(1e4))   # == data_frame(x = 1:1e4, y = rnorm(1e4))
+tdf <- tibble(x = 1:1e4, 
+              y = rnorm(1e4))   # == data_frame(x = 1:1e4, y = rnorm(1e4))
 class(tdf)
 
 # the print nicely
@@ -103,6 +127,8 @@ tibble(ints = 1:5,
 sum(1:8) %>%
   sqrt()
 
+# less readable
+sqrt(sum(1:8))
 
 ##### dplyr #####
 
@@ -293,3 +319,4 @@ who %>%
   # with ggplot  
   ggplot(aes(x = year, y = n, group = country)) +
   geom_line(size = .2)
+
