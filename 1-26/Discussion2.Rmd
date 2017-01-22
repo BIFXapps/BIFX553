@@ -128,7 +128,11 @@ gbsg <- as_data_frame(gbsg) %>%
 save(gbsg, file = 'gbsg.RData')
 ```
 
+Let's write our model using the standard notation:
+$$ nodes_i = \beta_0 + age_i*\beta_1 + size_i*\beta_2 + grade_i*\beta_3 + \varepsilon_i $$
+
 ```{r first model, include = FALSE}
+# We will use the lm function in R to fit our linear model
 gbsg.lm <- lm(nodes ~ age + size*grade + meno + pgr + er + hormon, data = gbsg) %>%
   tidy()
 ```
