@@ -168,8 +168,11 @@ In the case of a multiple linear regression, the slopes of the regression lines 
 $$\mbox{E}(nodes_i) = \beta_0 + \beta_1 * size_i + \beta_2 * meno_i$$
 
 ```{r categorical multi LM}
-lm(nodes ~ size + meno, data = gbsg) %>%
-  tidy()
+tmp_lm <- lm(nodes ~ size + meno, data = gbsg)
+tidy(tmp_lm)
+
+ggplot(data = augment(tmp_lm), aes(size, .fitted, color = meno)) +
+  geom_smooth(se = FALSE)
 ```
 
 ### Interactions
@@ -181,7 +184,7 @@ $$\mbox{E}(nodes_i) = \beta_0 + \beta_1 * size_i + \beta_2 * meno_i + \beta_3 * 
 lm(nodes ~ size * meno, data = gbsg) %>%
   tidy()
 
-ggplot(gbsg, aes(size, nodes, group = meno)) +
+ggplot(gbsg, aes(size, nodes, color = meno)) +
   geom_smooth(method = 'lm')
 ```
 

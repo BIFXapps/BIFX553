@@ -445,7 +445,8 @@ who %>%
   filter(maxCases < 100000) %>%
 # with ggplot  
   ggplot(aes(x = year, y = n, group = country)) +
-  geom_line(size = .2)
+  geom_line(size = .2) +
+  scale_y_log10()
 ```
 
  [\\]: # \textcolor{red}{add + scale\_y\_log10()}
