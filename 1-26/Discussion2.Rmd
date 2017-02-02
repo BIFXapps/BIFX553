@@ -79,7 +79,7 @@ Convenience samples are often what we are left with when we fail to properly pla
 
 ![](figures/ColliderStratificationBias.png){width=50%}
 
-[//]: # ![Whitcomb et al. Figure 1a](figures/WhitcombFig1a.png)
+![Whitcomb et al. Figure 1a: RF = risk factor, BWT = birth weight, U = unmeasured factors.](figures/WhitcombFig1a.png)
 
 In general, there are a number of predictor variables that we should always consider at potential confounders. The predictors on Harrell's list will rarely all be needed for any one study, but he provides a good list to consider:
 - age
@@ -187,6 +187,25 @@ lm(nodes ~ size * meno, data = gbsg) %>%
 ggplot(gbsg, aes(size, nodes, color = meno)) +
   geom_smooth(method = 'lm')
 ```
+
+## An asside on Methods sections
+
+The following subsections may be included in your methods section as apprpriate. Sometimes you will see different names for these. For example the Materials subsection might be called "Genotyping" if it deals only with the genotyping methods used, or it may be split into a couple of subsections if it makes better sense and aids readability.
+- Participants: A description of the study participants, what population they come from, how they were sampled and what data were collected. The experimental design may fit well here, or it might be broken out into its own subsection.
+- Materials: Description of any materials and/or tools you used to collect your data. Specifics on what assays and equipment were used go in this section.
+- Statistical Analysis: Description of statistical tests used, statistical correction for known biases/errors, validation of assuptions, etc...
+
+When writing a methods section, it is good to keep the following things in mind:
+- This section should be written in the past tense
+- Check for consistency with the rest of the paper. Make sure that if you mention all statistical test and data sources. Conversely, anything that isn't relevant elsewhere in the paper doesn't need to be addressed in the methods section.
+- You want to include enough information that anyone not familiar with your study could replicate what you did, but you also want to keep this section short. This is why methods sections tend to be dense.
+- It is good practice to put your work down for a day or two and come back to it with fresh eyes. Some people find it helpful to read out loud to themselves. Doing this will help you find errors and increase readability.
+
+## An asside on Results sections
+
+SanFrancisco Edit has a really nice tip sheet on how to write a results section (see http://www.sfedit.net/results.pdf). Overall, you should be sure that the results section tells a neutral, cohesive story about your study results. You should *not* make any interpretations or jumpt to any conclusions in this section! The purpose is to lay out the facts. Care should be taken to arrange the presentation of tables and figures in a way that lets the data tell their own story.
+
+The methods used to derive every result in this setion should be contained in the methods section. You also want to arrange the methods and results sections in such a way that the methods used for a particular result will be as easy to identify as possible.
 
 ## Homework
 
