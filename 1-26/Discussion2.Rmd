@@ -133,8 +133,8 @@ $$ nodes_i = \beta_0 + age_i*\beta_1 + size_i*\beta_2 + grade_i*\beta_3 + \varep
 
 ```{r first model, include = FALSE}
 # We will use the lm function in R to fit our linear model
-gbsg.lm <- lm(nodes ~ age + size*grade + meno + pgr + er + hormon, data = gbsg) %>%
-  tidy()
+gbsg.lm <- lm(nodes ~ age*meno + size + grade + pgr + er + hormon, data = gbsg)
+tidy(gbsg.lm)
 ```
 
 Interpretation of Model Parameters
@@ -191,11 +191,13 @@ ggplot(gbsg, aes(size, nodes, color = meno)) +
 ## An asside on Methods sections
 
 The following subsections may be included in your methods section as apprpriate. Sometimes you will see different names for these. For example the Materials subsection might be called "Genotyping" if it deals only with the genotyping methods used, or it may be split into a couple of subsections if it makes better sense and aids readability.
+
 - Participants: A description of the study participants, what population they come from, how they were sampled and what data were collected. The experimental design may fit well here, or it might be broken out into its own subsection.
 - Materials: Description of any materials and/or tools you used to collect your data. Specifics on what assays and equipment were used go in this section.
 - Statistical Analysis: Description of statistical tests used, statistical correction for known biases/errors, validation of assuptions, etc...
 
 When writing a methods section, it is good to keep the following things in mind:
+
 - This section should be written in the past tense
 - Check for consistency with the rest of the paper. Make sure that if you mention all statistical test and data sources. Conversely, anything that isn't relevant elsewhere in the paper doesn't need to be addressed in the methods section.
 - You want to include enough information that anyone not familiar with your study could replicate what you did, but you also want to keep this section short. This is why methods sections tend to be dense.
