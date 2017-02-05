@@ -36,24 +36,32 @@ How does our model hold up?
 load('../1-26/gbsg.RData')
 
 # model from Discussion2
-gbsg.lm <- lm(nodes ~ age + size + grade + meno + pgr + er + hormon, data = gbsg)
+gbsg.lm <- lm(nodes ~ age + meno + size + grade + pgr + er + hormon, data = gbsg)
 
 ggplot(gbsg, aes(size, nodes)) +
   geom_point() +
   geom_smooth(method = 'lm')
+
+# this is probably a better way to look at the data
+ggplot(gbsg, aes(size, nodes)) +
+  geom_point() +
+  geom_smooth(method = 'lm')+ 
+  geom_jitter(alpha = .2) +
+  scale_y_log10()
 ```
 
 [//]: # (\textcolor{red}{Size and nodes are integers, so we aren't really sure how they stack up. Use jitter and transparency.})
 
-[//]: # \textcolor{red}{ggplot(gbsg) +}
-[//]: # \textcolor{red}{  geom\_jitter(alpha = 0.2) +}
-[//]: # (\textcolor{red}{  geom\_smooth(method = 'lm') +})
-[//]: # \textcolor{red}{  geom\_rug() +}
-[//]: # \textcolor{red}{  scale\_y\_log10() +}
-[//]: # \textcolor{red}{  scale\_x\_log10()}
-
 ```{r new model, include=FALSE}
-gbsg.lm2 <- lm(nodes ~ age + size + grade + meno + pgr + er + hormon, data = gbsg)
+gbsg <- mutate(gbsg,
+               lnodes = log10(nodes),
+               lenodes = log(nodes),
+               lsize = log10(size),
+               lpgr = log10(pgr + 0.1),
+               ler = log10(er + 0.1))
+
+gbsg.lm2 <- lm(lnodes ~ age + size + grade + meno + lpgr + ler + hormon, data = gbsg)
+gbsg.lm3 <- glm(nodes ~ size + grade + meno + pgr + er + hormon, data = gbsg, family = quasipoisson)
 ```
 
 ### Linear Relationship
@@ -70,7 +78,11 @@ lm(y ~ x1 + x2, data = tmp) %>%
 
 How does our model look?
 
-```{r linearity check, fig.width=7}
+```{r linearity check, fig.width=6}
+# old model
+crPlots(gbsg.lm)
+
+# new model
 crPlots(gbsg.lm2)
 ```
 
@@ -80,9 +92,14 @@ There are a couple of ways we can look at normality. The Sapiro-Wilk test for no
 
 ```{r normality check}
 # Shpiro-Wilk test for normality
-shapiro.test(augment(gbsg.lm2)$.std.resid)
+with(augment(gbsg.lm), 
+     shapiro.test(.std.resid))
+
+with(augment(gbsg.lm2), 
+     shapiro.test(.std.resid))
 
 # quantile quantile plot
+qqPlot(gbsg.lm)
 qqPlot(gbsg.lm2)
 ```
 
@@ -90,6 +107,12 @@ You could also plot a histogram of your residuals along with a normal distributi
 
 ```{r normality check2}
 # take a look at the residuals
+augment(gbsg.lm) %>%
+  ggplot(aes(.std.resid)) + # plot studentized residuals on x-axis
+  geom_histogram(aes(y = ..density..)) + # plot histogram as density, rather than frequency
+  stat_function(fun = dnorm, color = 'red') # put a N(0,1) density over the top
+
+
 augment(gbsg.lm2) %>%
   ggplot(aes(.std.resid)) + # plot studentized residuals on x-axis
   geom_histogram(aes(y = ..density..)) + # plot histogram as density, rather than frequency
@@ -102,6 +125,7 @@ augment(gbsg.lm2) %>%
 
 ```{r multicolloinearity check}
 # variance inflation factors
+vif(gbsg.lm)
 vif(gbsg.lm2)
 ```
 
@@ -112,6 +136,8 @@ vif(gbsg.lm2)
 [//]: # \textcolor{red}{For example, daylight cycles. Draw picture.}
 
 ```{r autocorrelation check}
+# Durbin-Watson test for autocorrelation
+durbinWatsonTest(gbsg.lm)
 durbinWatsonTest(gbsg.lm2)
 ```
 
@@ -123,9 +149,11 @@ durbinWatsonTest(gbsg.lm2)
 
 ```{r homoscedasticity check}
 # statistical test for heteroscedasticity (null is that they are homoscedastic)
+ncvTest(gbsg.lm)
 ncvTest(gbsg.lm2)
 
 # scale-location plot
+plot(gbsg.lm, which = 3)
 plot(gbsg.lm2, which = 3)
 ```
 
@@ -133,6 +161,7 @@ The `spreadLevelPlot` function gives us a slightly nicer picture of this. The so
 
 ```{r homo check2}
 # another scale-location plot
+spreadLevelPlot(gbsg.lm)
 spreadLevelPlot(gbsg.lm2)
 ```
 
@@ -142,6 +171,7 @@ The `outlierTest` function gives us a list of the most significant outliers in a
 
 ```{r Outlier Tests1}
 # returns the most significant outliers in the residuals
+outlierTest(gbsg.lm)
 outlierTest(gbsg.lm2)
 ```
 
@@ -152,8 +182,11 @@ We can also graphically inspect the influence that each row of data (or each ind
 
 ```{r Outlier Tests2}
 # Cook's Distance
+plot(gbsg.lm, which = 4)
 plot(gbsg.lm2, which = 4)
 
+# Influence
+influencePlot(gbsg.lm)
 influencePlot(gbsg.lm2)
 ```
 
@@ -194,6 +227,7 @@ Now lets take a look at all of the predictors in our model:
 
 ```{r term influence, fig.width=7}
 # added variable plots
+avPlots(gbsg.lm)
 avPlots(gbsg.lm2)
 ```
 
