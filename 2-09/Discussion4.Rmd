@@ -4,24 +4,24 @@ author: "Randy Johnson"
 date: "February 9, 2017"
 header-includes:
   \usepackage{cancel}
-output:
-  pdf_document: default
+output: beamer_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
+knitr::opts_chunk$set(cache = TRUE, error = TRUE)
 library(car)
 library(splines)
 library(tidyverse)
 library(broom)
+
 theme_set(theme_classic() +
           theme(axis.line.x = element_line(color = 'black'),
-                axis.line.y = element_line(color = 'black')))
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 15)))
 ```
 
 
-Modeling and testing complex interactions
-=========================================
+## Modeling and testing complex interactions
 
 As a reminder, let's write out our model from a few weeks back:
 
@@ -35,35 +35,56 @@ $$ nodes_i = \beta_0 + \beta_1 age_i + \beta_2 size_i + \beta_3 grade_i + \varep
 
 - $\varepsilon_i$ are the error terms for the model (i.e. how far off is the model prediction from what we observed)
 
-### Fitting categorical predictors
+
+## Fitting categorical predictors
 
 For variables that are categorical (e.g. sex, race), we normally include dummy variables for them in the model.
 
 $$ weight_i = \beta_0 + \beta_1 height_i + \beta_2 (sex_i = M) + \varepsilon_i $$
 
-```{r ordinal predictors1}
+
+## Fitting categorical predictors
+\small
+```{r categroical predictors1}
 set.seed(293847)
 # data for our categorical predictor example
-bmi <- data_frame(sex = c(rep(c('M', 'F'), each = 50)),
-                  height = rnorm(100, mean = ifelse(sex == 'M', 70, 65), # average US height
-                                 sd = ifelse(sex == 'M', 4, 3.5)), 
-                  bmi = ifelse(sex == 'M', 2^rnorm(100, 4.7004, 0.2305), # ave BMI - men
-                                           2^rnorm(100, 4.6439, 0.3086)), # ave BMI - women
-                  weight = ((height / 12 / 3.28)^2 * bmi) * 2.2) # calculate weight
+bmi <- data_frame(
+         sex = c(rep(c('M', 'F'), each = 50)),
+         # average US height
+         height = rnorm(100, mean = ifelse(sex == 'M', 70, 65), 
+                        sd = ifelse(sex == 'M', 4, 3.5)), 
+                                  # ave BMI - men
+         bmi = ifelse(sex == 'M', 2^rnorm(100, 4.7004, 0.2305),
+                                  # ave BMI - women
+                                  2^rnorm(100, 4.6439, 0.3086)),
+         # calculate weight
+         weight = ((height / 12 / 3.28)^2 * bmi) * 2.2) 
+```
 
-# take a graphical look at the relationsihp between height and weight
+
+## Fitting categorical predictors
+```{r categorical predictors2, fig.height=4}
+# graphical view of relationsihp btween height and weight
 ggplot(bmi, aes(x = height, y = weight, group = sex)) +
   geom_point(aes(color = sex, shape = sex)) +
   geom_smooth(method = 'lm', aes(color = sex))
+```
 
+
+## Fitting categorical predictors
+\small
+```{r categorical predictors3}
 # and now for a statistical look
 lm(weight ~ height + sex, data = bmi) %>%
   tidy()
 ```
 
+
+## Fitting categorical predictors
+\small
 In the background R is doing the following:
 
-```{r ordinal predictors2}
+```{r ordinal categorical predictors4}
 # create a dummy variable for "sex == 'M'"
 bmi$male <- as.integer(bmi$sex == 'M')
 
@@ -72,6 +93,8 @@ lm(weight ~ height + male, data = bmi) %>%
   tidy()
 ```
 
+
+## Fitting categorical predictors
 When we write this out in a formula, we get
 
 $$
@@ -82,7 +105,7 @@ weight_i & = \beta_0 + \beta_1 height_i + \beta_2 (sex_i = M) + \varepsilon_i \\
 \end{aligned}
 $$
 
-when $sex_i$ is 'M' and 
+when $sex_i$ is `M'
 
 $$
 \begin{aligned}
@@ -91,8 +114,12 @@ weight_i & = \beta_0 + \beta_1 height_i + \cancel{\beta_2 (0)} + \varepsilon_i \
 \end{aligned}
 $$
 
-So, exactly what does $\beta_2$ represent? It is interpreted as the difference in height between a male and a female who are otherwise similar (i.e. in our case, they are the same height). If we work this out, we get:
+when $sex_i$ is `F'
 
+## Fitting categorical predictors
+So, exactly what does $\beta_2$ represent? It is interpreted as the difference in height between a male and a female who are otherwise similar (i.e. in our case, they are the same height).
+
+\small
 $$
 \begin{aligned}
 \mbox{E}(weight_i - weight_j | height_i = height_j) =& \beta_0 + \beta_1 height_i + \beta_2 (sex_i = M) \\
@@ -104,7 +131,7 @@ $$
 \end{aligned}
 $$
 
-### An asside on the interpretation of the intercept
+## An asside on the interpretation of the intercept
 
 What does the intercept ($\beta_0$) really mean? In the model above, $\beta_0$ is what we get when $sex_i = `F'$ and $height_i= 0$. So, the predicted weight of a Female who is 0 inches tall would be
 
@@ -116,8 +143,13 @@ $$
                    & = -236 \mbox{ lbs}
 \end{aligned}
 $$
-This, of course, makes no sense, neither the height nor the weight. For this reason, the intercept is often ignored. If we wanted the intercept to make sense, we could recenter $height_i$ like so:
+This, of course, makes no sense, neither the height nor the weight. For this reason, the intercept is often ignored.
 
+## An asside on the interpretation of the intercept
+
+If we wanted the intercept to make sense, we could recenter $height_i$ like so:
+
+\small
 ```{r recenter height}
 # lets center height at the sample median (or there abouts)
 median(bmi$height)
@@ -128,6 +160,8 @@ bmi <- mutate(bmi,
 lm(weight ~ ht_med + sex, data = bmi) %>%
   tidy()
 ```
+
+## An asside on the interpretation of the intercept
 
 Now, the intercept has a more useful meeing. It represents the expected weight of a 5'7" female:
 
@@ -140,17 +174,19 @@ $$
 \end{aligned}
 $$
 
+##
 
-Dealing with Non-linearity
---------------------------
-
-### Simple non-linear terms
+ Dealing with Non-linearity
+ 
+## Simple non-linear terms
 
 We saw in Discussion 3 that the number of nodes in the `gbsg` data set was more log-normally than normally distributed. Also, we looked at an example where the relationsihp between a predictor was a quadratic relationship, rather than a linear relationship. What do we do in these cases?
 
+## Simple non-linear terms: Example 1
 
-```{r linearity example1, fig.width=5, fig.asp = .5}
-# Example 1: quadratic relationship between predictor and outcome
+\small
+```{r linearity example1a, fig.width=5, fig.asp = .5}
+# quadratic relationship between predictor and outcome
 set.seed(293847)
 tmp <- data_frame(x1 = rnorm(100),
                   x2 = rnorm(100),
@@ -159,78 +195,122 @@ tmp <- data_frame(x1 = rnorm(100),
 # wrong model... y ~ x2 is a quadratic relationsihp
 lm(y ~ x1 + x2, data = tmp) %>%
   crPlots()
+```
 
+## Simple non-linear terms: Example 1
+
+```{r linearity example1b, fig.width=5, fig.asp = .5}
 # create a new variable and try this 
 mutate(tmp, x2_sqrd = x2^2) %>%
   lm(formula = y ~ x1 + x2_sqrd) %>%
   crPlots() # looks much better!
 ```
 
-```{r linearity example2}
-# Example 2: log-normally distributed outcome variable
+## Simple non-linear terms: Example 2
+
+```{r linearity example2a, fig.asp = .5}
+# log-normally distributed outcome variable
 load('../1-26/gbsg.RData')
 
 # wrong model... nodes is log-normally distributed
 lm(nodes ~ size + grade, data = gbsg) %>%
   qqPlot()
-
-# lets try with log(nodes) ... still not perfect, but much better
-mutate(gbsg, lnodes = log(nodes)) %>%
-  lm(formula = lnodes ~ size + grade) %>%
-  qqPlot()
-
 ```
 
-### Splines
+## Simple non-linear terms: Example 2
+
+\small
+```{r linearity example2b, fig.asp = .5}
+# lets try with log(nodes) ... still not perfect
+mutate(gbsg, lnodes = log(nodes)) %>%
+  lm(formula = lnodes ~ size + grade) %>%
+  # a lot better -- we will revisit this in a future discussion
+  qqPlot()
+```
+
+## Splines
 
 Sometimes, the relationship between a predictor and the outcome is neither linear, nor does it conform to a nice function that we can use for a simple transformation. In such a case, splines can help.
 
-```{r spline1}
-# add some additional weight for individuals over 70 inches tall
-bmi <- mutate(bmi, weight2 = ifelse(height < 70, weight, weight + 6*(height - 70)))
+\small
+```{r spline1a}
+# add some additional weight for people over 70 inches tall
+bmi <- mutate(bmi, 
+              weight2 = ifelse(height < 70, weight,
+                               weight + 6*(height - 70)))
 
 # what does this look like?
 g <- filter(bmi, sex == 'M') %>%
-     ggplot(aes(x = height, y = weight2)) +
-     geom_point() +
-     geom_smooth()
-g
-
-# we can include a 1st degree spline with a knot at height = 70
-g + geom_smooth(method = 'lm', se = FALSE, color = 'red', linetype = 2,
-                formula = y ~ bs(x, knots = 70, degree = 1))
-
-# the linear regression model would look like this:
-mdl1 <- lm(weight2 ~ bs(height, knots = 70, degree = 1), data = subset(bmi, sex == 'M'))
-mdl2 <- lm(weight2 ~ bs(height, knots = 70, degree = 1) + sex, data = bmi)
+    ggplot(aes(x = height, y = weight2)) +
+    geom_point() +
+    geom_smooth()
 ```
 
-Interpreting the regression coefficients directly is beyond the scope of this class, but there is an easy way to use this model to predict. This should work with any of the models we will be generating in this class. All you need is the model output from `lm` and a data frame with the values needed to predict. In `mdl1`, we only need to include `height`, but we also need to include `sex` for `mdl2`.
+## Splines
 
-```{r spline2}
+```{r echo = FALSE}
+g
+```
+
+## Splines
+\small
+```{r spline1b, fig.asp = .5}
+# we can include a 1st degree spline with a knot at height = 70
+g + geom_smooth(method = 'lm', se = FALSE, color = 'red',
+                linetype = 2, formula = y ~ bs(x, knots = 70, 
+                                               degree = 1))
+```
+
+## Splines
+\small
+```{r spline1c}
+# the linear regression model(s) would look like this:
+mdl1 <- lm(weight2 ~ bs(height, knots = 70, degree = 1), 
+           data = subset(bmi, sex == 'M'))
+
+mdl2 <- lm(weight2 ~ bs(height, knots = 70, degree = 1) + sex,
+           data = bmi)
+```
+
+## Splines: Interpretation/Prediction
+Interpreting the regression coefficients directly is beyond the scope of this class, but there is an easy way to use this model to predict. This should work with any of the models we will be generating in this class. All you need is the model output from `lm` and a data frame with the values needed to predict.
+
+```{r spline2a}
 # for the male-only model
 data_frame(height = 70) %>%
   predict(object = mdl1)
+```
 
+
+## Splines: Interpretation/Prediction
+In `mdl1`, we only needed to include `height`, but we also need to include `sex` for `mdl2`.
+
+```{r spline2b}
 # for the full model
 data_frame(height = c(70, 67),
            sex = c('M', 'F')) %>%
   predict(object = mdl2)
 ```
 
+## Splines: Higher order splines
+
 You can also use the `bs` function to fit higher order polynomial splines (the default is a cubic spline).
 
-### Non-parametric regression
+## Non-parametric regression
 
 You may have noticed that the default output of `geom_smooth()` is a smooth function that looks sort of like a moving average. The default smoother used for data sets with less than 1000 observations is called loess, and a generalized additive model is used with larger data sets. You won't get p-values from this, but it can be a valuable tool to graphically see what is going on.
 
 ```{r smoothing example}
 # make up some data and plot the smoothing line
-data_frame(x = rnorm(500, 0, 3),
-           y = x - .1*x^2 + .005*x^3 + rnorm(500)) %>%
-  ggplot(aes(x = x, y = y)) +
-  geom_point() +
-  geom_smooth()
-
+g <- data_frame(x = rnorm(500, 0, 3),
+                y = x -.1*x^2 + .005*x^3 + rnorm(500)) %>%
+       ggplot(aes(x = x, y = y)) +
+       geom_point() +
+       geom_smooth()
 ```
 
+## Non-parametric regression
+
+```{r echo=FALSE}
+g
+```
