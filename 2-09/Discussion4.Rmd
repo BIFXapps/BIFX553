@@ -314,3 +314,7 @@ g <- data_frame(x = rnorm(500, 0, 3),
 ```{r echo=FALSE}
 g
 ```
+
+## Homework
+
+Three datasets will be provided for analysis. Pick an appropriate model for each data set, checking assumptions. Submit appropriatly commented R code only. No write-up is required.
