@@ -1,7 +1,7 @@
 ---
-title: "BIFX 553 - Discussion 4"
+title: "BIFX 553 - Complex Interactions"
 author: "Randy Johnson"
-date: "February 9, 2017"
+date: "February 16, 2017"
 header-includes:
   \usepackage{cancel}
 output: beamer_presentation
@@ -175,7 +175,7 @@ $$
 $$
 
 ##
-
+\Large
  Dealing with Non-linearity
  
 ## Simple non-linear terms
@@ -243,7 +243,7 @@ bmi <- mutate(bmi,
 g <- filter(bmi, sex == 'M') %>%
     ggplot(aes(x = height, y = weight2)) +
     geom_point() +
-    geom_smooth()
+    geom_smooth(se = FALSE)
 ```
 
 ## Splines
@@ -256,7 +256,7 @@ g
 \small
 ```{r spline1b, fig.asp = .5}
 # we can include a 1st degree spline with a knot at height = 70
-g + geom_smooth(method = 'lm', se = FALSE, color = 'red',
+g + geom_smooth(method = 'lm', se = FALSE, color = 'orange3',
                 linetype = 2, formula = y ~ bs(x, knots = 70, 
                                                degree = 1))
 ```

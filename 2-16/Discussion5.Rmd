@@ -2,69 +2,101 @@
 title: "BIFX 553 - Discussion 5"
 author: "Randy Johnson"
 date: "February 16, 2017"
-output:
-  pdf_document: default
+output: beamer_presentation
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
-library(missForest)
+```
+
+## Setup
+\small
+```{r setup visible}
+options(warn = -1)
+library(missForest) # for imputation
 library(tidyverse)
-library(broom)
+library(broom) # for tidy model display
+
 theme_set(theme_classic() +
           theme(axis.line.x = element_line(color = 'black'),
                 axis.line.y = element_line(color = 'black'),
                 text = element_text(size = 15)))
 ```
 
+##
+\Large
 Tests of Association
---------------------
 
-### Single parameter
+## Single parameter tests
 
 We've already seen and discussed p-values in regression output, but we will discuss them in more detail here. Our favorite model is currently
-$$ nodes_i = \beta_0 + age_i*\beta_1 + size_i*\beta_2 + grade_i*\beta_3 + \varepsilon_i. $$
+$$ \log (nodes_i) = \beta_0 + age_i*\beta_1 + size_i*\beta_2 + grade_i*\beta_3 + \varepsilon_i. $$
 
-```{R gbsg model}
-# load the GBSG data from Discussion 2
-load('../1-26/gbsg.RData')
-
-# revisit our model
-full.model <- lm(lnodes ~ age + size + grade + meno + lpgr + ler + hormon, data = gbsg)
-tidy(full.model)
-```
+## Single parameter tests
 
 Given this model, what are the statistically significantly associated predictors of the number of nodes? How would you describe these associations? Can we remove any variables from the model without loosing information?
 
-### Multiple degree of freedom tests
+\scriptsize
+```{R load gbsg, echo=FALSE}
+# load the GBSG data from Discussion 2
+load('../1-26/gbsg.RData')
+gbsg <- mutate(gbsg, 
+               lnodes = log(nodes),
+               lpgr = log(pgr + 0.1),
+               ler = log(er + 0.1))
+```
+```{R gbsg model}
+# revisit our model
+full.model <- lm(lnodes ~ age + size + grade + meno + lpgr + ler + hormon, 
+                 data = gbsg)
+tidy(full.model)
+```
+
+## Multiple degree of freedom tests
 
 That last question is perhaps best answered with a multiple degree of freedom test. Lets say that we want to check our model against a model without `age`, `grade`, `pgr`, `er` and the `size:grade` interaction. We can do this with the `anova` function in R.
 
-```{r anova}
+```{r anova1}
 # this is our alternate model
-alt.model <- update(full.model, . ~ . - age - lpgr - ler - hormon)
+alt.model <- update(full.model, 
+                    . ~ . - age - lpgr - ler - hormon)
+```
 
-# check if we are loosing a significant amount of information if we stick with the alternate model
+## Multiple degree of freedom tests
+
+It appears as if we could trim the `full.model` down a bit in favor of the `alt.model`. Does this fit well with our disease model?
+
+\scriptsize
+```{r anova2}
+# check if we are loosing a significant amount of 
+# information if we stick with the alternate model
 anova(full.model, alt.model)
 ```
 
-It appears as if we could trimg the `full.model` down a bit in favor of the `alt.model`. Does this fit well with our disease model?.
+## Multiple degree of freedom tests
 
-![DAG summarizing our disease model.](../1-26/GBSG DAG.pdf){width=50%}
+![DAG summarizing our disease model.](../1-26/GBSG DAG.pdf)
 
-
+##
+\Large
 Missing Data
-------------
 
-### Types of missing data
+## Types of missing data
+Missing completely at random: no factors relating to the samples (measured or not) influenced which data are missing.
 
-- Missing completely at random: no factors relating to the samples (measured or not) influenced which data are missing. Example: A study ends prematurely, and some data are not able to be collected, independent of any sample characteristics.
+- Example: A study ends prematurely, and some data are not able to be collected, independent of any sample characteristics.
 
-- Missing at random: some important factors may have influenced which data are missing, but the probablility of missingness is a function of variables that were measured. Example: Individuals with depression may be more likely to be lost to followup, resulting in missing data. As long as loss to followup isn't related to the variable that is missing (e.g. number of cigarettes smoked each week during the study), we can assume that the number of cigarettes smoked by individuals we did observe is representative of the number of cigarettes smoked by individuals we didn't observe.
+## Types of missing data
+Missing at random: some important factors may have influenced which data are missing, but the probablility of missingness is a function of variables that were measured.
 
-- Informative missing: missing data are biased in some way by other confounding variables. This results in estimates that are higher or lower than they should be. This is often nearly impossible to detect without some outside information (e.g. experience with past studies or knowledge of the population under study). Example: some unmeasured counfounding variable(s) influences heavy smokers in the treatment group to drop out of the study at a higher rate than individuals who smoke less.
+- Example: Individuals with depression may be more likely to be lost to followup, resulting in missing data. As long as loss to followup isn't related to the variable that is missing (e.g. number of cigarettes smoked each week during the study), we can assume that the number of cigarettes smoked by individuals we did observe is representative of the number of cigarettes smoked by individuals we didn't observe.
 
-### Problems stemming from missing data
+## Types of missing data
+Informative missing: missing data are biased in some way by other confounding variables. This results in estimates that are higher or lower than they should be. This is often nearly impossible to detect without some outside information (e.g. experience with past studies or knowledge of the population under study).
+
+- Example: Some unmeasured counfounding variable (location: poor neighborhood) influences heavy smokers in the treatment group to drop out of the study at a higher rate than individuals who smoke less.
+
+## Problems stemming from missing data
 
 Always characterize missingness of data. Ask questions like:
 
@@ -72,12 +104,12 @@ Always characterize missingness of data. Ask questions like:
 - Are there any factors in our disease model that would cause an individual to have missing data?
 - What other relationships between observed data and missingness exist?
 
-Informative missingness can cause unexpected problems, including false associations. Example: In the previous presidential election, the "undecided" voters (i.e. likely voters with missing data) voted disproportionately for President Trump. This failed assumption resulted in unreliable polling leading up to the election.
+Informative missingness can cause unexpected problems, including false associations.
 
-### Dealing with missing data
+- Example: In the previous presidential election, the "undecided" voters (i.e. likely voters with missing data) voted disproportionately for President Trump. This failed assumption resulted in unreliable polling leading up to the election.
 
-- Ignore missing data
-
+## Dealing with missing data: Ignore missing data
+\scriptsize
 ```{r lots of missing data}
 set.seed(239847)
 n <- 100
@@ -88,14 +120,18 @@ dat <- data_frame(x1 = rnorm(n),
                   y = x1 + x2 + x1*x2 + (g == 1) + rnorm(n)) %>%
        prodNA()
 dat
-                  
+```
+
+## Dealing with missing data: Ignore missing data
+\small
+```{r ignore missing}
 # look at the relationship between x and y by g
 lm(y ~ x1*x2 + g, data = dat) %>%
   tidy()
 ```
 
-- Replace missing data with the group mean
-
+## Dealing with missing data: Replace missing data with the group mean
+\scriptsize
 ```{r group mean replacement}
 # replace
 dat <- mutate(dat, 
@@ -108,9 +144,10 @@ lm(y ~ mx1*mx2 + g, data = dat) %>%
   tidy()
 ```
 
-- Impute
-
+## Dealing with missing data: Impute
+\scriptsize
 ```{r impute missing}
+options(warn = -1)
 imp <- select(dat, -mx1, -mx2, -mg) %>%
        as.data.frame() %>% # won't accept a tibble
        missForest()
@@ -118,4 +155,3 @@ imp <- select(dat, -mx1, -mx2, -mg) %>%
 lm(y ~ x1*x2 + g, data = imp$ximp) %>%
   tidy()
 ```
-
