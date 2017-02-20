@@ -14,6 +14,10 @@ theme_set(theme_classic() +
                   axis.line.y = element_line(color = 'black'),
                   text = element_text(size = 15)))
 
+#############
+# GBSG Data #
+#############
+
 # load data
 load("../Data/gbsg.RData")
 
@@ -37,3 +41,13 @@ tmp$resid_dist  # Multivariate normality
 tmp$vifs        # Multicollinearity
 
 tmp$spreadLevel # Homoscedasticity
+
+
+#################
+# Homework Data #
+#################
+
+# load data
+load('../Data/06_NonLinearVariables.RData')
+
+# start with a visual inspection of each data set

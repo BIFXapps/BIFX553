@@ -6,8 +6,9 @@ output: beamer_presentation
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(cache = TRUE, error = TRUE, fig.width = 4, fig.asp = 1)
+knitr::opts_chunk$set(error = TRUE, fig.width = 4, fig.asp = 1)
 library(shrink)
+library(car)
 library(tidyverse)
 library(broom)
 theme_set(theme_classic() +
@@ -20,6 +21,7 @@ theme_set(theme_classic() +
 \small
 ```{r setup visible, eval = FALSE}
 library(shrink)
+library(car)
 library(tidyverse)
 library(broom)
 theme_set(theme_classic() +
@@ -144,3 +146,168 @@ Sources include:
 - Check all assumptions.
 - Interactions should still receive careful consideration.
 - Imputation might be helpful, but often results in no net benefit.
+
+##
+\Large
+Assumptions Review
+
+## Example data
+\small
+```{r bad data}
+set.seed(923747)
+n <- 500
+dat <- data_frame(x = rnorm(n),
+                  x2 = rnorm(n, x, 0.5),
+                  x3 = rnorm(n),
+                  x4 = 1:n,
+                  y0 = x + x3 + rnorm(n),
+                  nonlin_y = x^2 + rnorm(n),
+                  auto_y = diffinv(rnorm(n-1)),
+                  homo_y = x + rnorm(n, sd = (x + abs(min(x)))),
+                  out_y = y0) %>%
+       bind_rows(data_frame(x = c(0,4), out_y = rep(10,2)))
+  
+
+dat$x[n-1] <- max(dat$x) # outlier with leverage
+dat$x[n] <- 0 # outlier without leverage
+
+# OK
+model0 <- lm(y0 ~ x, data = dat)
+```
+
+## Example data
+
+```{r models}
+# Nonlinear + Non-normal
+model1 <- lm(nonlin_y ~ x, data = dat)
+
+# Multicollinearity
+model2 <- lm(y0 ~ x + x2 + x3, data = dat)
+model3 <- update(model2, . ~ . - x2) # OK
+
+# Autocorrelation
+model4 <- lm(auto_y ~ x4, data = dat)
+
+# Homoscedasticity
+model5 <- lm(homo_y ~ x, data = dat)
+
+# with outliers
+model6 <- lm(out_y ~ x, data = dat)
+```
+
+## Linearity
+
+Component Residual Plots, `crPlots()`, shows the relationship between each predictor and the outcome, after accounting for all of the other variables in the model. Since this doesn't work so well with interactions, simply remove the interactions to view these relationships.
+```{r linearity, echo=FALSE, fig.width=3, fig.heigt=3.5}
+options(warn=FALSE)
+
+crPlots(model0, ylab = '', xlab = 'model0')
+crPlots(model1, ylab = '', xlab = 'model1')
+```
+
+## Multivariate Normality
+
+There are a few ways to check for multivariate normality.
+
+- `shapiro.test()`
+- `qqPlot()`
+- Plotting a histogram of the residuals (redundant)
+
+```{r normality, echo=FALSE, fig.width=2.8, fig.height=3.5, fig.align='center', fig.show='hold'}
+
+p0 <- shapiro.test(augment(model0)$.std.resid)$p %>%
+      signif(2)
+p1 <- shapiro.test(augment(model1)$.std.resid)$p %>%
+      signif(2)
+
+
+qqPlot(model0, ylab = '', xlab = paste0('model0 (p=', p0, ')'))
+qqPlot(model1, ylab = '', xlab = paste0('model1 (p=', p1, ')'))
+```
+
+## Little/No Multicollinearity
+
+If the variance inflation factors are too big (e.g. greater than 2), they are likely to be collinear with another predictor. Removing one of the collinear variables is usually sufficient to meet this assumption.
+
+```{r multicollinearity}
+vif(model2)
+vif(model3)
+```
+
+## No Autocorrelation
+
+Autocorrelation occurs when there is correlation between the elements of a series that are separated by a given interval (e.g. 1 day).
+
+```{r autocorrelation, echo=FALSE, fig.width=6, fig.asp=0.3, fig.align='center'}
+ggplot(dat, aes(x4, auto_y)) +
+  geom_point() + 
+  geom_smooth(se = FALSE, span = 0.1, method = 'loess')
+
+durbinWatsonTest(model4)
+```
+
+## Homoscedasticity
+
+Heteroscedasticity occurs when the variance about the regression line is not constant. We can test this assumption with `ncvTest()` or `spreadLevelPlot()`.
+
+```{r homoscedasticity1, echo=FALSE, fig.width=6, fig.asp=0.3, fig.align='center'}
+ggplot(dat, aes(x, homo_y)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE)
+
+ncvTest(model5)
+```
+
+## Homoscedasticity
+
+We want both trend lines to be as flat as possible (i.e. straight line wth slope = 0).
+
+```{r homoscedasticity2, echo=FALSE, fig.width=2.8, fig.height=3, fig.align='center', fig.show='hold'}
+options(warn=-1)
+
+spreadLevelPlot(model0, ylab = '') %>%
+  invisible()
+
+spreadLevelPlot(model5, ylab = '') %>%
+  invisible()
+```
+
+## Outliers and Leverage
+
+Use `outlierTest()` to get a list of outliers. 
+
+```{r outliers}
+outlierTest(model6)
+```
+
+Remember that some outliers affect our model more than others. `influencePlot()` will give us a nice picture of which outliers we need to worry about.
+
+## Outliers and Leverage
+
+- Hat-values: A measure of the amount of influence each data point has on the outcome predictions.
+
+- Residuals: The difference between the observed and predicted value of the outcome variable.
+
+- Studentized residuals: Scaled residuals, such that they have mean = 0 and variance = 1.
+
+- Cook's distance: A measure of the effect of each data point on the regression coefficients.
+
+- `influencePlot()` gives reference lines at
+    - vertical: `mean(.hat)*c(2,3)`
+    - horizontal: 0 and $\pm 2$ SDs
+
+## Outliers and Leverage
+
+```{r leverage, echo = FALSE}
+influencePlot(model6) %>%
+  invisible()
+```
+
+## Outliers and Leverage
+
+```{r leverage2, echo=FALSE}
+ggplot(dat, aes(x, out_y)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE) +
+  annotate('text', x=c(4,4,0), y=c(1,9.5,9.5), label = c(499,502,501))
+```
