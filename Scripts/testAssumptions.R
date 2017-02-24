@@ -5,12 +5,14 @@ require(ggplot2)
 require(broom)
 require(car)
 
-testAssumptions <- function(model)
+# to do: add titles to figures, include model identifier as well
+testAssumptions <- function(model, allPlots = FALSE)
 {
   violations <- ""
   
   # Linear Relationship
-  crPlots(model)
+  if(allPlots)
+      crPlots(model)
   
   # Multivariate Normality
   ShapiroWilks <- with(augment(model),
@@ -30,12 +32,18 @@ testAssumptions <- function(model)
     stat_function(fun = dnorm, color = 'gold3', size = 2)
   
   # Multicollinearity
-  vifs <- vif(model)
+  if(length(attributes(terms(model))$term.labels) > 1)
+  {
+    vifs <- vif(model)
   
-  if(any(vifs > 2))
-    violations <- paste0(violations, "Multicollinearity violation (",
-                         paste(names(vifs[vifs> 2]), ":", round(vifs[vifs > 2], 1),
-                               collapse = ', '), ")\n")
+    if(any(vifs > 2))
+      violations <- paste0(violations, "Multicollinearity violation (",
+                           paste(names(vifs[vifs> 2]), ":", round(vifs[vifs > 2], 1),
+                                 collapse = ', '), ")\n")
+  }else{
+    # will throw an error if there is only one term
+    vifs <- NULL
+  }
   
   # Autocorrelation
   DW <- durbinWatsonTest(model)
@@ -62,7 +70,7 @@ testAssumptions <- function(model)
   tmp <- augment(model) %>%
     mutate(id = 1:length(.fitted),
            .p = 2*pnorm(abs(.std.resid), lower.tail = FALSE),
-           outlier = .p < 0.05 / length(.fitted))
+           outlier = .p < 0.05 / sum(!is.na(.fitted)))
   
   outliers <- filter(tmp, outlier) %>%
     select(id, .std.resid, .p, .cooksd, .hat) %>%
@@ -76,10 +84,11 @@ testAssumptions <- function(model)
     geom_text(aes(label = ifelse(outlier, id, '')))
   
   # Predictor Influence
-  avPlots(model)
+  if(allPlots)
+      avPlots(model)
   
   if(nchar(violations) > 0)
-    cat(violations)
+    warning(violations)
   
   invisible(list(ShapiroWilks = ShapiroWilks,
                  qqplot = qqplot,

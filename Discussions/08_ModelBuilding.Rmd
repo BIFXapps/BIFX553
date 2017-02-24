@@ -32,7 +32,7 @@ theme_set(theme_classic() +
 
 ##
 \Large
-Mulivariable Modeling Strategies
+Multivariable Modeling Strategies
 
 ## Prespecification of predictor complexity
 
@@ -42,7 +42,7 @@ Mulivariable Modeling Strategies
 
 ## Variable selection
 
-There are automated methods for building your model (e.g. foward or backward selection). These are best avoided because:
+There are automated methods for building your model (e.g. forward or backward selection). These are best avoided because:
 
 - $r^2$ values will be biased too high.
 - Test statistics do not have the correct distribution.
@@ -53,9 +53,9 @@ There are automated methods for building your model (e.g. foward or backward sel
 
 ## Overfitting
 
-Overfitting is likely to occur if the number of parameters is too high.
+Over-fitting is likely to occur if the number of parameters is too high.
 
-At some point, new parameters added to the model will fit sampling noise rather than the information we are trying to make inferrences about.
+At some point, new parameters added to the model will fit sampling noise rather than the information we are trying to make inferences about.
 
 A common rule of thumb for picking the number of variables is $\frac{sample~size}{10}$ or $\frac{sample~size}{20}$ for continuous variables (see pg 61 of Harrell, 2001 for more information).
 
@@ -89,7 +89,7 @@ tidy(model)
 ## Shrinkage
 The regression coefficient for $x5$ is too big, and the coefficients for $x1$, $x2$ and $x3$ are all slightly too big. Predictions of $y$ using this model will be slightly too big, and this effect will be magnified for points lying further from the mean.
 
-Shrinkage can be used to compensate some for this (models with more parameters will bennefit more).
+Shrinkage can be used to compensate some for this (models with more parameters will benefit more).
 
 ```{r shrinkage}
 shrink(model)
@@ -110,8 +110,9 @@ Clustering or summarizing (e.g. using principal components) can be another power
 ## Overly influential variables
 
 Sources include:
+
 - Data entry errors
-- Measurement error (if a particular variable is too noisy, it may be best to just throw out all obervations of that particular predictor)
+- Measurement error (if a particular variable is too noisy, it may be best to just throw out all observations of that particular predictor)
 - Data need to be transformed
 - Not enough data to model a complex system
 - Model doesn't fit a specific subset of the data
@@ -125,7 +126,7 @@ Sources include:
 ## Summary: Developing predictive models
 
 - Collect lots of data.
-- Do you homework when developing the disease model/hypothesis.
+- Do your homework when developing the disease model/hypothesis.
 - Impute missing data if there isn't much. Will people using your model have trouble collecting all the variables you are using?
 - Reduce the number of predictors if necessary/practical.
 - Check all assumptions.
@@ -137,7 +138,7 @@ Sources include:
 ## Summary: Developing models for effect estimation
 
 - Parsimony isn't as important in this context.
-- Interactions should still receive carful consideration.
+- Interactions should still receive careful consideration.
 - Imputation of predictors is less helpful.
 - Check all assumptions.
 
@@ -239,6 +240,7 @@ vif(model3)
 Autocorrelation occurs when there is correlation between the elements of a series that are separated by a given interval (e.g. 1 day).
 
 ```{r autocorrelation, echo=FALSE, fig.width=6, fig.asp=0.3, fig.align='center'}
+options(warn = -1)
 ggplot(dat, aes(x4, auto_y)) +
   geom_point() + 
   geom_smooth(se = FALSE, span = 0.1, method = 'loess')
@@ -251,6 +253,7 @@ durbinWatsonTest(model4)
 Heteroscedasticity occurs when the variance about the regression line is not constant. We can test this assumption with `ncvTest()` or `spreadLevelPlot()`.
 
 ```{r homoscedasticity1, echo=FALSE, fig.width=6, fig.asp=0.3, fig.align='center'}
+options(warn = -1)
 ggplot(dat, aes(x, homo_y)) +
   geom_point() +
   geom_smooth(method = 'lm', se = FALSE)
@@ -260,7 +263,7 @@ ncvTest(model5)
 
 ## Homoscedasticity
 
-We want both trend lines to be as flat as possible (i.e. straight line wth slope = 0).
+We want both trend lines to be as flat as possible (i.e. straight line with slope = 0).
 
 ```{r homoscedasticity2, echo=FALSE, fig.width=2.8, fig.height=3, fig.align='center', fig.show='hold'}
 options(warn=-1)
