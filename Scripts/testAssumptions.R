@@ -15,21 +15,28 @@ testAssumptions <- function(model, allPlots = FALSE)
       crPlots(model)
   
   # Multivariate Normality
-  ShapiroWilks <- with(augment(model),
-                       shapiro.test(.std.resid))
-  if(ShapiroWilks$p.value < 0.05)
-    violations <- paste0(violations, "Multivariate normality violation (p = ", 
-                         signif(ShapiroWilks$p.value, 2), ")\n")
+  if('glm' %in% class(model) & model$family$family != 'gaussian')
+  {
+    ShapiroWilks <- NULL
+    qqplot <- NULL
+    resid_dist <- NULL
+  }else{
+    ShapiroWilks <- with(augment(model),
+                         shapiro.test(.std.resid))
+    if(ShapiroWilks$p.value < 0.05)
+      violations <- paste0(violations, "Multivariate normality violation (p = ", 
+                           signif(ShapiroWilks$p.value, 2), ")\n")
   
-  qqplot <- augment(model) %>%
-    ggplot(aes(sample = .std.resid)) +
-    stat_qq() +
-    geom_abline(intercept = 0, slope = 1, color = 'gold3', size = 1)
+    qqplot <- augment(model) %>%
+      ggplot(aes(sample = .std.resid)) +
+      stat_qq() +
+      geom_abline(intercept = 0, slope = 1, color = 'gold3', size = 1)
   
-  resid_dist <- augment(model) %>%
-    ggplot(aes(.std.resid)) +
-    geom_histogram(aes(y = ..density..)) +
-    stat_function(fun = dnorm, color = 'gold3', size = 2)
+    resid_dist <- augment(model) %>%
+      ggplot(aes(.std.resid)) +
+      geom_histogram(aes(y = ..density..)) +
+      stat_function(fun = dnorm, color = 'gold3', size = 2)
+  }
   
   # Multicollinearity
   if(length(attributes(terms(model))$term.labels) > 1)
@@ -53,11 +60,16 @@ testAssumptions <- function(model, allPlots = FALSE)
                          signif(DW$p, 2), ")\n")
   
   # Homoscedasticity
-  ncv <- ncvTest(model)
+  if('glm' %in% class(model) & model$family$family != 'gaussian')
+  {
+    ncv <- NULL
+  }else{
+    ncv <- ncvTest(model)
   
-  if(ncv$p < 0.05)
-    violations <- paste0(violations, "Homoscedasticity violation (p = ",
-                         signif(ncv$p, 2), ")\n")
+    if(ncv$p < 0.05)
+      violations <- paste0(violations, "Homoscedasticity violation (p = ",
+                           signif(ncv$p, 2), ")\n")
+  }
   
   spreadLevel <- augment(model) %>%
     ggplot(aes(.fitted, abs(.std.resid))) +

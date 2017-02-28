@@ -1,0 +1,239 @@
+---
+title: "BIFX 553 - Confidence Intervals"
+author: "Randy Johnson"
+date: "March 2, 2017"
+output: beamer_presentation
+header-includes: \usepackage{amsmath}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 5, fig.asp = 0.4)
+library(gmodels)
+library(tidyverse)
+library(broom)
+theme_set(theme_classic() +
+          theme(axis.line.x = element_line(color = 'black'),
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 15)))
+```
+
+## Setup
+\small
+```{r setup2, eval=FALSE}
+library(gmodels)
+library(tidyverse)
+library(broom)
+theme_set(theme_classic() +
+          theme(axis.line.x = element_line(color = 'black'),
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 15)))
+```
+
+##
+\Large
+Confidence Intervals
+
+## Confidence Interals
+
+Two results will help us understand the derivation of confidence intervals:
+
+- Central Limit Theorem
+- Law of Large Numbers
+
+## Central Limit Theorem
+
+The mean, $\bar{x}$, of $n$ independent, identically distributed random variables, $X$, with well defined expected value, E$(X) = \mu$, and variance, Var$(X) = \sigma$, will be approcimately normally distributed when $n$ is sufficiently large:
+
+$$ \bar{x} \sim \mbox{N}\left( \mu, \frac{\sigma}{\sqrt{n}} \right) $$
+
+## Central Limit Theorem: Simulation
+
+Load the R function found at http://tinyurl.com/zenq9q3.
+
+```{r clt, eval=FALSE}
+# Normal distribution, sample size of 10
+clt.test(rnorm, 10)
+
+# Chi-squared distribution sample size of 5
+clt.test(rchisq, 5, df = 3)
+
+# Bimodal mixture of Normals, sample size of 10
+rbimodal <- function(n)
+{
+  m <- rbinom(n, 1, 0.5) %>%
+       as.logical()
+  
+  return(ifelse(m, rnorm(n),
+                   rnorm(n, 5, 2)))
+}
+clt.test(rbimodal, 10)
+```
+
+
+## Law of Large Numbers
+
+Given our sample mean, $\bar{x}$, the Law of Large Numbers states that $\bar{x}$ will converge to the true population mean as the sample size increases, assuming the sample, $X$, are independent, identically distributed random variables.
+
+$$ \bar{x} \xrightarrow{n \rightarrow \infty} \mu $$
+
+## Law of Large Numbers: Simulation
+
+```{r LLN1}
+set.seed(293874)
+lln <- data_frame(x = 10^seq(from = 0, to = 4, 
+                             length = 500),
+                  y = {map(x, rnorm) %>%
+                       map(mean) %>%
+                       unlist()})
+
+g <- ggplot(lln, aes(x, y)) + 
+     geom_line() + 
+     scale_x_log10()
+```
+
+## Law of Large Numbers: Simulation
+
+```{r LLN2, echo=FALSE, fig.asp=.8}
+g
+```
+
+## The distribution of $\bar{x}$
+
+```{r distribution of mean, echo=FALSE, fig.width=2.25, fig.asp=1}
+l <- 300
+meanDist <- data_frame(x = seq(from = -3, to = 3, length = l),
+                       d1 = dnorm(x),
+                       d10 = dnorm(x, sd = 1/sqrt(10)),
+                       d50 = dnorm(x, sd = 1/sqrt(50)))
+
+ggplot(meanDist, aes(x, d1)) +
+  geom_line() +
+  ylim(0, max(meanDist$d50)) +
+  ylab("Prob. Density")
+
+ggplot(meanDist, aes(x, d50)) +
+  geom_line() +
+  geom_line(data = meanDist, aes(x, d10)) +
+  geom_text(data = data_frame(x = c(1.2,1.5),
+                              y = 2:1),
+            aes(x, y, label = c("n = 50", "n = 10"))) +
+  ylab("") +
+  xlab("Sample mean")
+```
+
+## 95\% Confidence Region
+
+95\% of the samples of $x$ we collect will fall in $\mu \pm 1.95\sigma$. This forms the basis of our confidence interval. Side note: the area under this curve over the range $(-\infty, \infty)$, and every probability distribution, is 1.
+
+```{r 0.95 CR, echo=FALSE}
+
+ggplot(meanDist, aes(x, d1)) +
+  geom_line() +
+  geom_polygon(data = bind_rows(data_frame(x = -1.96, d1 = 0),
+                                filter(meanDist, x > -1.96 & x < 1.96),
+                                data_frame(x = 1.96, d1 = 0)),
+               aes(x, d1)) +
+  ylab("Prob. Density")
+```
+
+## 95\% Confidence Interval construction
+
+When the sample size is 10, the distribution of $\bar{x}$ looks like this. 95/% of the time we will expect $\bar{x}$ to fall in the region $\left(\mu \pm \frac{1.95\sigma}{\sqrt{n}}\right)$. From this, we infer that we are 95\% confident that the true mean lies within the interval $\left(\bar{x} \pm \frac{1.95*sd}{\sqrt{n}}\right)$.
+
+```{r 0.95 CI 1, echo=FALSE}
+
+ggplot(meanDist, aes(x, d10)) +
+  geom_line() +
+  geom_polygon(data = bind_rows(data_frame(x = -1.96/sqrt(10), d10 = 0),
+                                filter(meanDist, x > -1.96/sqrt(10) & x < 1.96/sqrt(10)),
+                                data_frame(x = 1.96/sqrt(10), d10 = 0)),
+               aes(x, d10)) +
+  ylab("Prob. Density") +
+  xlab(expression(bar(x)))
+```
+
+## 95\% CI Example 1
+
+Lets say that we are studying a population, and we have a sample of 100 blood systolic preasure measurements. The mean is 123 and the standard deviation is 12. What is our confidence interval?
+
+$$ \bar{x} = 123, sd(x) = 12, n = 100 $$
+$$ \mbox{95\% CI}(\mu) = 123 \pm \frac{1.95*12}{\sqrt{100}} = (120.66, 125.34) $$
+
+## 95\% CI with gmodels
+
+Let's simulate a similar data set in R and use the gmodels package to calculate the CI.
+
+```{r CI of vector}
+set.seed(29874)
+rnorm(100, 123, 12) %>%
+  ci()
+```
+
+## 95\% CI of lm object
+
+A more practical use of `ci()` can be applied to the homework from a few weeks ago.
+
+\scriptsize
+```{r CI of lm1}
+load('../Data/06_NonLinearVariables.RData')
+lm(y ~ x1*x2, data = dat1) %>%
+  ci()
+```
+
+## 95\% CI of lm object
+
+Now it is your turn. What is the 95\% CI for the $x1$ variable in the second dataset from a few weeks ago? The model is provided here for your convenience. What about the 90\% CI?
+
+```{r CI of lm2, eval=FALSE}
+lm(log(y) ~ x1, data = dat2)
+```
+
+## Estimates with 95\% CIs
+
+Now, suppose we want to know the 95\% CI of the expected number of nodes with detectable cancer in a woman with the following measurements: 
+
+- size = 23
+- grade = 2
+- pgr = 32.5
+- hormon = "no tamoxifen"
+
+```{r gbsg setup, echo=FALSE}
+load('../Data/gbsg.RData')
+gbsg <- mutate(gbsg,
+               lnodes = log(nodes),
+               lpgr = log(pgr + 0.1))
+```
+
+As you may recall, the model we chose for this last week was
+
+\small
+```{r gbsg model}
+model <- lm(lnodes ~ size + grade + lpgr + hormon, data = gbsg)
+coef(model)
+```
+
+## Estimates with 95\% CIs
+
+`ci()` will give us the confidence intervals for each of the betas, but won't get us very far with a specific prediction. We can get the prediction using `predict()`, but what is the standard error of the prediction?
+
+```{r gbsg prediction}
+predict(model, data.frame(size = 23, grade = 2, 
+                          lpgr = log(32.5),
+                          hormon = 'no tamoxifen')) %>%
+  exp() %>%
+  signif(2)
+```
+
+## Estimates with 95\% CIs
+
+We can use the `estimable()` function to give us CI's.
+
+\small
+```{r estimable1}
+estimable(model, cm = c(1, 23, 2, signif(log(32.5), 1), 1), 
+          conf.int = 0.95)[c(1,6,7)]
+```
+
+## Estiates with 95\% CIs
+
+We can also use `estimable()` to explore more complicated questions. For example, we could ask, is there a difference in the expected number of expected nodes between a woman with a grade 2, 27 mm tumor and a woman with a grade 3, 20 mm tumor?
