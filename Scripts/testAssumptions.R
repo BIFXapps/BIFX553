@@ -15,7 +15,11 @@ testAssumptions <- function(model, allPlots = FALSE)
       crPlots(model)
   
   # Multivariate Normality
-  if('glm' %in% class(model) & model$family$family != 'gaussian')
+  GLMmodel <- !is.null(model$family) # model$family is null for lm
+  if(GLMmodel)
+    GLMmodel <- model$family$family != 'gaussian'
+    
+  if(GLMmodel)
   {
     ShapiroWilks <- NULL
     qqplot <- NULL
@@ -60,7 +64,7 @@ testAssumptions <- function(model, allPlots = FALSE)
                          signif(DW$p, 2), ")\n")
   
   # Homoscedasticity
-  if('glm' %in% class(model) & model$family$family != 'gaussian')
+  if(GLMmodel)
   {
     ncv <- NULL
   }else{
