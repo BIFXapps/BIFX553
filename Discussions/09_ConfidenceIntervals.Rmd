@@ -3,7 +3,9 @@ title: "BIFX 553 - Confidence Intervals"
 author: "Randy Johnson"
 date: "March 2, 2017"
 output: beamer_presentation
-header-includes: \usepackage{amsmath}
+header-includes:
+  \usepackage{amsmath}
+  \usepackage{cancel}
 ---
 
 ```{r setup, include=FALSE}
@@ -184,8 +186,9 @@ lm(y ~ x1*x2, data = dat1) %>%
 
 Now it is your turn. What is the 95\% CI for the $x1$ variable in the second dataset from a few weeks ago? The model is provided here for your convenience. What about the 90\% CI?
 
-```{r CI of lm2, eval=FALSE}
-lm(log(y) ~ x1, data = dat2)
+```{r CI of lm2}
+lm(log(y) ~ x1, data = dat2) %>%
+  ci(confidence = 0.9)
 ```
 
 ## Estimates with 95\% CIs
@@ -234,6 +237,38 @@ estimable(model, cm = c(1, 23, 2, signif(log(32.5), 1), 1),
           conf.int = 0.95)[c(1,6,7)]
 ```
 
-## Estiates with 95\% CIs
+## Estimates with 95\% CIs
 
 We can also use `estimable()` to explore more complicated questions. For example, we could ask, is there a difference in the expected number of expected nodes between a woman with a grade 2, 27 mm tumor and a woman with a grade 3, 20 mm tumor?
+
+\small
+$$
+\begin{aligned}
+1) \log E(nodes | size = 27, grade = 2) &= \beta_0 + 27 \beta_1 + 2 \beta_2 + lpgr \beta_3 + hormon \beta_4 \\
+2) \log E(nodes | size = 27, grade = 2) &= \beta_0 + 20 \beta_1 + 3 \beta_2 + lpgr \beta_3 + hormon \beta_4 \\
+\end{aligned}
+$$
+
+\normalsize
+$$
+\begin{aligned}
+eqn1 - eqn2 &= \cancel{\beta_0} + 27 \beta_1 + 2 \beta_2 + 
+               \cancel{lpgr \beta_3} + \cancel{hormon \beta_4} \\
+            & - \left( \cancel{\beta_0} + 20 \beta_1 + 3 \beta_2 + 
+                       \cancel{lpgr \beta_3} + \cancel{hormon \beta_4} \right) \\
+            &= 7 \beta_1 - \beta_2
+\end{aligned}
+$$
+
+## Estimates with 95% CIs
+
+```{r solution1, eval = FALSE}
+estimable(model, cm = c(size = 7, grade = -1), 
+          conf.int = 0.95)
+```
+
+\scriptsize
+```{r solution2, echo = FALSE}
+estimable(model, cm = c(size = 7, grade = -1), 
+          conf.int = 0.95)
+```

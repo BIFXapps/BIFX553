@@ -27,7 +27,7 @@ asm0$outlier_leverage
 asm1 <- testAssumptions(model1)
 asm1$outlier_leverage
 
-ci(model1)
+ci(model1) %>% exp()
 
 
 ##### Logistic Regression #####

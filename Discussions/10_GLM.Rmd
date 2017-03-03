@@ -1,5 +1,5 @@
 ---
-title: "Generalized Logistic Regression"
+title: "Generalized Linear Modeling"
 author: "Randy Johnson"
 date: "3/2/2017"
 header-includes:
@@ -19,7 +19,7 @@ theme_set(theme_classic() +
 
 ##
 \Large
-Generalized Linear Regression
+Generalized Linear Modeling
 
 ## GLM
 
