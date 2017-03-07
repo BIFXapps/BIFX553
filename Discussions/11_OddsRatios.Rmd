@@ -1,0 +1,224 @@
+---
+title: "Odds Ratios"
+author: "Randy Johnson"
+date: "3/9/2017"
+output: beamer_presentation
+header-includes:
+  \usepackage{tikz}
+  \usetikzlibrary{shapes,backgrounds}
+  \usepackage{multicol}
+  \usepackage{cancel}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Quick review of probability
+
+This Venn diagram represents the event space for two events, $A$ and $B$. The area inside of the rectangle is 1.
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(45:2.5cm) circle (2cm)}
+\def\thirdcircle{(0:2.5cm) circle (2cm)}
+
+\centering
+\begin{tikzpicture}
+    \draw (-3,-3) rectangle (5.5,2.5);
+    \draw \firstcircle node {$A$};
+    \draw \thirdcircle node {$B$};
+\end{tikzpicture}
+
+## Quick review of probability
+
+This represents P($A$).
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(45:2.5cm) circle (2cm)}
+\def\thirdcircle{(0:2.5cm) circle (2cm)}
+
+\centering
+\begin{tikzpicture}
+    % P(A)
+    \begin{scope}
+      \fill[yellow] \firstcircle;
+    \end{scope}
+    
+    \draw (-3,-3) rectangle (5.5,2.5);
+    \draw \firstcircle node {$A$};
+    \draw \thirdcircle node {$B$};
+
+\end{tikzpicture}
+
+## Quick review of probability: Union
+
+This represents P($A \cup B$).
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(45:2.5cm) circle (2cm)}
+\def\thirdcircle{(0:2.5cm) circle (2cm)}
+
+\centering
+\begin{tikzpicture}
+    % P(A)
+    \begin{scope}
+      \fill[yellow] \firstcircle;
+      \fill[yellow] \thirdcircle;
+    \end{scope}
+    
+    \draw (-3,-3) rectangle (5.5,2.5);
+    \draw \firstcircle node {$A$};
+    \draw \thirdcircle node {$B$};
+
+\end{tikzpicture}
+
+## Quick review of probability: Intersection
+
+This represents P($A \cap B$).
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(45:2.5cm) circle (2cm)}
+\def\thirdcircle{(0:2.5cm) circle (2cm)}
+
+\centering
+\begin{tikzpicture}
+    % P(A)
+    \begin{scope}
+      \clip \firstcircle;
+      \fill[yellow] \thirdcircle;
+    \end{scope}
+    
+    \draw (-3,-3) rectangle (5.5,2.5);
+    \draw \firstcircle node {$A$};
+    \draw \thirdcircle node {$B$};
+
+\end{tikzpicture}
+
+## Quick review of probability: Practice
+
+\begin{multicols}{2}
+$$
+\begin{aligned}
+\mbox{P}\left(!\left(A \cup B\right) \right) &= \\
+\mbox{P}(A) &= \\
+\mbox{P}(A \cap !B) &= 
+\end{aligned}
+$$
+\\  \columnbreak
+$$
+\begin{aligned}
+\mbox{P}(A\cap B) &= \\
+\mbox{P}(A|B) &= \\
+\mbox{P}(A|!B) &= 
+\end{aligned}
+$$
+\end{multicols}
+
+\def\firstcircle{(0,0) circle (2.25cm)}
+\def\secondcircle{(45:2.5cm) circle (2cm)}
+\def\thirdcircle{(0:2.5cm) circle (1.75cm)}
+
+\centering
+\begin{tikzpicture}
+    \draw (-3,-3) rectangle (5.5,2.5);
+    \draw \firstcircle node {$\begin{array}{c} A\\ 0.23 \end{array}$};
+    \draw \thirdcircle;
+    \draw (2.8,0) node {$\begin{array}{c} B\\ 0.12 \end{array}$};
+    \draw (1.7,0) node {0.06};
+\end{tikzpicture}
+
+
+## Definition: Odds
+
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the odds of event $D$ given exposure / no exposure are
+
+\scriptsize
+\begin{multicols}{2}
+$$
+\begin{aligned}
+odds(D=1|E=1) &= \frac{\mbox{P}(D=1|E=1)}{\mbox{P}(D=0|E=1)} \\
+              &= \left. \frac{n_{1,1}}{\cancel{n_{1,\bullet}}} \middle/ 
+                        \frac{n_{1,0}}{\cancel{n_{1,\bullet}}}\right. \\
+              &= \frac{n_{1,1}}{n_{1,0}}
+\end{aligned}
+$$
+\\[-12pt] \columnbreak
+$$
+\begin{aligned}
+odds(D=1|E=0) &= \frac{\mbox{P}(D=1|E=0)}{\mbox{P}(D=0|E=0)} \\
+              &= \left. \frac{n_{0,1}}{\cancel{n_{0,\bullet}}} \middle/ 
+                        \frac{n_{0,0}}{\cancel{n_{0,\bullet}}}\right. \\
+              &= \frac{n_{0,1}}{n_{0,0}}
+\end{aligned}
+$$
+\end{multicols}
+
+## Definition: Odds Ratio
+
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the ratio of the odds of disease comparing exposure vs no exposure is
+
+$$
+\begin{aligned}
+OR(D|E) &= \frac{odds(D=1|E=1)}{odds(D=1|E=0)} \\
+          &= \left. \frac{n_{1,1}}{n_{1,0}} \middle/
+                    \frac{n_{0,1}}{n_{0,0}} \right. \\
+          &= \frac{n_{1,1}n_{0,0}}{n_{1,0}n_{0,1}}.
+\end{aligned}
+$$
+
+## Definition: $se(\log OR)$
+
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the log OR is normally distributed, and its standard error is
+
+$$ se(\log OR) = \sqrt{\frac{1}{n_{1,1}} + 
+                       \frac{1}{n_{1,0}} + 
+                       \frac{1}{n_{0,1}} + 
+                       \frac{1}{n_{0,0}}}. $$
+
+## Putting everything together
+
+Given a disease outcome, $D$, and exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          & $D = 1$ & $D = 0$ & row total \\ \hline
+  $E = 1$ &    36   &    54   &           \\
+  $E = 0$ &    32   &    89   &           \\ \hline
+col total &         &         & 
+\end{tabular}
+\end{center}
+
+what is the OR and 95% CI for the exposure, $E$? Is this statistically significant?
