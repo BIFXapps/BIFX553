@@ -1,0 +1,323 @@
+---
+title: "Survival Analysis"
+author: "Randy Johnson"
+date: "3/9/2017"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(car)
+library(survival)
+library(tidyverse)
+theme_set(theme_classic() +
+          theme(axis.line.x = element_line(color = 'black'),
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 20)))
+
+# colorbline palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# load the multiplot function
+source('../Scripts/multiplot.R')
+```
+
+## Setup
+
+\small
+```{r setup2, eval = FALSE, echo = TRUE}
+library(car)
+library(survival)
+library(tidyverse)
+theme_set(theme_classic() +
+          theme(axis.line.x = element_line(color = 'black'),
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 20)))
+
+# colorbline palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# load the multiplot function
+source('../Scripts/multiplot.R')
+```
+
+## Survival: Definition
+
+Survival time is the amount of time that elapses from a common starting piont until an event occurs. Examples of events include: time to HIV acquisition, time to recurrence of cancer, time to successful pregnancy.
+
+## Survival: Graphical example of raw survival data (GBSG)
+
+```{r survival data}
+load('../Data/gbsg.RData')
+
+set.seed(928347)
+gbsg.sub <- filter(gbsg, sample(c(TRUE, FALSE), dim(gbsg)[1],
+                                replace = TRUE, prob = c(0.05, 0.95))) %>%
+            arrange(desc(t))
+
+# set up figure (base R graphics example)
+plot(NA, NA, xlab = '', ylab = '', xlim = c(0,max(gbsg.sub$t)), 
+     ylim = c(1,dim(gbsg.sub)[1]), yaxt = 'n', bty = 'n', cex.axis = 1.5)
+abline(v = 0)
+
+# draw lines
+for(i in 1:dim(gbsg.sub)[1])
+{
+  lines(c(0,gbsg.sub$t[i]), rep(i, 2))
+}
+
+# add observed/censored points on the end
+points(gbsg.sub$t + 0.03, 1:dim(gbsg.sub)[1], pch = ifelse(gbsg.sub$d == 1, 19, 1),
+       cex = ifelse(gbsg.sub$d == 1, 1, 1))
+
+# add legend
+legend('topright', legend = c('Observed', 'Censored'), 
+       pch = c(19, 1), bty = 'n', cex = 2)
+```
+
+## Kaplan-Meier Curves: Creation
+
+```{r km curve setup}
+gbsg.sub <- arrange(gbsg.sub, t, d)
+```
+
+\scriptsize
+```{r km curve derivation, echo = TRUE}
+# derivation of a survival curve, the hard way
+curve <- data.frame(t = 0, # time
+                    s = 1) # survival proportion
+
+# go through random sample of 65 individuals
+for(i in 1:dim(gbsg.sub)[1])
+{
+  # proportion who survived until now
+  curve <- bind_rows(curve,
+          data_frame(t = gbsg.sub$t[i],
+                     s = min(curve$s)))
+  
+  # if there is an event, decrease survival
+  if(gbsg.sub$d[i] == 1)
+  {
+    t.curr <- gbsg.sub$t[i]
+    prop_lost_to_event = 1 / dim(filter(gbsg.sub, t >= t.curr))[1]
+    curve <- bind_rows(curve,
+            data_frame(t = t.curr,
+                       s = min(curve$s) - prop_lost_to_event))
+  }
+}
+```
+
+## Kaplan-Meier Curve: Creation
+
+```{r km curve derivation2}
+ggplot(curve, aes(t, s)) + 
+  geom_line() +
+  ylim(0,1) +
+  ylab("% Recurrence Free") +
+  xlab("Time (yrs)")
+```
+
+## Kaplan-Meier Curves: Full GBSG data set
+
+```{r km1}
+gbsg$surv <- Surv(gbsg$t, gbsg$d)
+
+par(mar = c(5,5,4,2) + 0.1)
+survfit(surv ~ 1, data = gbsg) %>%
+  plot(bty = 'l', cex.axis = 1.5, ylab = '% Recurrance Free',
+       cex.lab = 2, xlab = 'Years')
+```
+
+## Kaplan-Meier Curves
+
+```{r km2}
+par(mar = c(5,5,4,2) + 0.1)
+survfit(surv ~ grade, data = gbsg) %>%
+  plot(bty = 'l', col = cbbPalette[c(1,3,2)], lwd = 1.5, cex.axis = 1.5,
+       ylab = '% Recurrance Free', cex.lab = 2, xlab = 'Years')
+legend('topright', c('Grade=1', 'Grade=2', 'Grade=3'),
+       col = cbbPalette[c(1,3,2)], lty = 1, bty = 'n')
+```
+
+## Kaplan-Meier Curves: Code
+
+\small
+```{r km code, eval = FALSE, echo = TRUE}
+# create survival variable
+gbsg$surv <- Surv(gbsg$t, gbsg$d)
+
+# plot single curve
+survfit(surv ~ 1, data = gbsg) %>%
+  plot(bty = 'l', cex.axis = 1.5, ylab = '% Recurrance Free',
+       cex.lab = 2, xlab = 'Years')
+
+# plot curves by tumor grade
+survfit(surv ~ grade, data = gbsg) %>%
+  plot(bty='l', col=cbbPalette[c(1,3,2)], lwd=1.5, cex.lab=2,
+       cex.axis=1.5, ylab='% Recurrance Free', xlab='Years')
+
+legend('topright', c('Grade=1', 'Grade=2', 'Grade=3'),
+       col = cbbPalette[c(1,3,2)], lty = 1, bty = 'n')
+
+# noisy plot by tumor grade
+survfit(surv ~ grade, data = gbsg) %>%
+  plot(bty='l', col=cbbPalette[c(1,3,2)], conf.int=TRUE, lwd=1.5,
+       cex.axis=1.5, cex.lab=2, ylab='% Recurrance Free', xlab='Years')
+```
+
+## Kaplan-Meier Curves
+
+```{r km3}
+par(mar = c(5,5,4,2) + 0.1)
+survfit(surv ~ grade, data = gbsg) %>%
+  plot(bty = 'l', col = cbbPalette[c(1,3,2)], lwd = 1.5,
+       cex.axis = 1.5, conf.int = TRUE, cex.lab = 2,
+       ylab = '% Recurrance Free', xlab = 'Years')
+
+legend('topright', c('Grade=1', 'Grade=2', 'Grade=3'),
+       col = cbbPalette[c(1,3,2)], lty = 1, bty = 'n')
+```
+
+## Survival Analysis
+
+The analysis of survival until a particular event of interest needs to take 4 key measures into account:
+
+- Target event
+- Time origin
+- Time Metric
+- Censoring Causes
+
+Define these measures for GBSG
+
+## Survival Analysis: Time Metric
+
+The time metric can fall two different categories, continuous or discrete. There are four main ways in which we will get discrete time values:
+
+- Truly descrete: Events that may only occur at discrete time points (e.g. graduation time).
+- Partially discrete: These events can occur continuously, but tend to clump into discrete groups (e.g. teachers leaving jobs at the end of the year).
+- Discrete due to measurement & data collection constraints: These event times are continuous, but we only discrete times are available to us (e.g. CD4 measurements, or recall of event times on a questionare).
+- Aggregation: Summary of incident events over short periods of time (e.g. clinical events since last visit).
+
+## Survival Analysis: Censoring Causes
+
+We need to be aware of the cause of censoring whenever possible. One importaint thing to watch out for is emmigrative selection bias, when the risk among individuals being censored is somehow different than among those not censored (e.g. a side effect of the treatment is myocardial infarction, that causes patients to drop out of the study).
+
+- Administrative censoring: Censoring at the end of the study (no worries about emmigrative selection bias).
+- Drop-out or Loss to follow-up: Emmigrative bias must be addressed, but need not be a problem.
+- Competing risks: This can cause emmigrative bias, and the assumption that un/censored groups are similar is indefensible.
+
+## Survival Analysis: Hazard Function
+
+The discrete hazard function can be approximated by the following formula when no censoring or late entries exist.
+
+$$ 
+\begin{aligned}
+h(t) &= \mbox{P}(T=t | T \geq t) \\
+     &\approx \frac{\#~events~during~time~period~t}
+                   {\#~individuals~surviving~up~to~time~period~t}.
+\end{aligned}
+$$
+
+## Survival Analysis: Survival Function
+
+The discrete survival function is the probability of surviving until time $t$ without the event occuring.
+
+$$ S(t) = \prod_{i=0}^t h(i) $$
+
+## Cox Proportional Hazards Model
+
+- Response: Continuous, time to event
+- Interpretation:
+    - $\beta_{1\ldots n}$ are the log hazard ratios comparing the likelihood of an event in those exposed to $X$ to the reference group.
+- Caveats: Hazards are assumed to be proportional. This can be checked using the `cox.zph()` function or by looking at the log cumulative hazard function. This can be done in R by using the fun = 'cloglog' option in `plot.survfit` (see ?plot.survfit for more details). The baseline hazard, though, is arbitrary and isn’t even estimated. One important thing to keep in mind when analyzing survival data is that late entries should have thier immortal person time censored from the analysis. For time varying markers, we can split an individual’s time into pieces and include later time periods as late entries.
+
+$$ \log h(t) = \log h_0(t) + \beta_1 X_1 + \cdots + \beta_n X_n $$
+
+## Cox Proportional Hazards Model: Example
+
+\scriptsize
+```{r coxPH, echo = TRUE}
+(model <- coxph(surv ~ size + grade + nodes + er, data = gbsg)) %>%
+  summary()
+```
+
+## Cox Proportional Hazards Model: Linearity Assumption
+
+The Martingale plot should have a flat trend line. Most of these look OK, but the nodes should probably be log transformed.
+
+```{r CPH Linearity, fig.height=6}
+gbsg$.martingale <- residuals(model)
+
+options(warn = -1) # set this flag only for presentation - don't normally want this!
+multiplot(
+  ggplot(gbsg, aes(size, .martingale)) +
+    geom_jitter() +
+    geom_smooth(method = 'loess', linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(grade, .martingale)) + 
+    geom_jitter() + 
+    geom_smooth(method = 'loess', linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(nodes, .martingale)) +
+    geom_jitter() + 
+    geom_smooth(method = 'loess', linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(er, .martingale)) + 
+    geom_jitter() +
+    geom_smooth(method = 'loess', linetype = 2, se = FALSE),
+  
+  cols = 2)
+options(warn = 0)
+```
+
+## Cox Porportional Hazards Model: Linearity Assumption
+
+R code:
+
+```{r CPH Linearity code, echo = TRUE, eval = FALSE}
+gbsg$.martingale <- residuals(model)
+
+multiplot(
+  ggplot(gbsg, aes(size, .martingale)) +
+    geom_jitter() +
+    geom_smooth(linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(grade, .martingale)) + geom_jitter() + geom_smooth(linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(nodes, .martingale)) + geom_jitter() + geom_smooth(linetype = 2, se = FALSE),
+  
+  ggplot(gbsg, aes(er, .martingale)) + geom_jitter() + geom_smooth(linetype = 2, se = FALSE),
+  
+  cols = 2)
+```
+
+## Cox Proportional Hazards Model: Proportionality
+
+Proportionality assumption seems to be violated for grade and er measure.
+
+```{r proportionality, echo=TRUE}
+cox.zph(model)
+```
+
+## Cox Proportional Hazards Model: Proportionality
+
+This isn't really necessary, but is interesting to take a look at. We will use the same code as above, but use the `fun='cloglog'` argument. These lines should be roughly parallel.
+
+```{r proportionality2}
+survfit(surv ~ grade, data = gbsg) %>%
+  plot(bty = 'l', col = cbbPalette[c(1,3,2)], lwd = 1.5, cex.axis = 1.5,
+       ylab = 'log Cumulative Hazard', cex.lab = 2, xlab = 'log Time', fun = 'cloglog')
+legend('topright', c('Grade=1', 'Grade=2', 'Grade=3'),
+       col = cbbPalette[c(1,3,2)], lty = 1, bty = 'n')
+```
+
+## Cox Proportional Hazards Model: Collinearity
+
+We are familiar with this function. There are some potential problems with it, but as long as the VIFs are greater than 1, we can interpret them as before.
+
+\small
+```{r collinear, echo = TRUE}
+vif(model)
+```

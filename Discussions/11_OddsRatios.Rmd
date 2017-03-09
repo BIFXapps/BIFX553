@@ -12,6 +12,12 @@ header-includes:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(broom)
+theme_set(theme_classic() +
+          theme(axis.line.x = element_line(color = 'black'),
+                axis.line.y = element_line(color = 'black'),
+                text = element_text(size = 15)))
 ```
 
 ## Quick review of probability
@@ -222,3 +228,42 @@ col total &         &         &
 \end{center}
 
 what is the OR and 95% CI for the exposure, $E$? Is this statistically significant?
+
+## Logistic Regression: Review
+
+\scriptsize
+```{r glm code, echo = TRUE}
+set.seed(934875)
+n <- 100
+dat <- data_frame(ts = runif(100, 0, 10), # tumor size
+                  lodds = rnorm(n, (ts - 5)), # log odds of metastisis
+                  odds = exp(lodds),
+                  p = odds / (1 + odds),
+                  metastasis = rbinom(n, 1, p))
+
+model <- glm(metastasis ~ ts, data = dat, family = binomial)
+
+lodds.g <- ggplot(dat, aes(ts, lodds)) +
+           geom_point() +
+           ylab("log Odds") +
+           geom_abline(intercept = model[[1]][1], slope = model[[1]][2])
+
+set.seed(29384)
+p.g <- ggplot(dat, aes(ts, metastasis)) +
+       geom_jitter(width = 0, height = .05) +
+       geom_smooth(method = 'loess', se = FALSE, linetype = 2) +
+       geom_line(data = arrange(augment(model), .fitted), 
+                 aes(ts, exp(.fitted) / (1+exp(.fitted))))
+```
+
+## Logistic Regression: Review
+
+```{r glm1}
+lodds.g
+```
+
+## Logistic Regression: Review
+
+```{r glm2}
+p.g
+```
