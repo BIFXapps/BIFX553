@@ -102,20 +102,21 @@ This represents P($A \cap B$).
 
 ## Quick review of probability: Practice
 
+\small
 \begin{multicols}{2}
 $$
 \begin{aligned}
-\mbox{P}\left(!\left(A \cup B\right) \right) &= \\
-\mbox{P}(A) &= \\
-\mbox{P}(A \cap !B) &= 
+\mbox{P}\left(!\left(A \cup B\right) \right) &= 0.59\\
+\mbox{P}(A) &= 0.29 \\
+\mbox{P}(A \cap !B) &= 0.23
 \end{aligned}
 $$
 \\  \columnbreak
 $$
 \begin{aligned}
-\mbox{P}(A\cap B) &= \\
-\mbox{P}(A|B) &= \\
-\mbox{P}(A|!B) &= 
+\mbox{P}(A\cap B) &= 0.06 \\
+\mbox{P}(A|B) &= \frac{0.06}{0.18} = 0.33 \\
+\mbox{P}(A|!B) &= \frac{0.23}{0.82} = 0.28
 \end{aligned}
 $$
 \end{multicols}
@@ -134,8 +135,9 @@ $$
 \end{tikzpicture}
 
 
-## Definition: Odds
+## Definition: Odds of $D$ given $E$
 
+\small
 Given a disease outcome, $D$, an exposure, $E$, and
 
 \begin{center}
@@ -147,10 +149,47 @@ col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
 \end{tabular}
 \end{center}
 
-the odds of event $D$ given exposure / no exposure are
+the odds of event $D$ given exposure are \vspace{-16pt}
 
-\scriptsize
 \begin{multicols}{2}
+$$
+\begin{aligned}
+\mbox{P}(D=1|E&=1) \\ 
+                  &= \frac{\mbox{P}(D=1 \cap E=1)}{\mbox{P}(E=1)} \\
+                  &= \left. \frac{n_{1,1}}{\cancel N} \middle/ 
+                            \frac{n_{1,\bullet}}{\cancel N} \right. \\
+                  &= \frac{n_{1,1}}{n_{1,\bullet}} \\
+\end{aligned}
+$$
+\\ \columnbreak
+$$
+\begin{aligned}
+\mbox{P}(D=0|E&=1) \\
+                  &= \frac{\mbox{P}(D=0 \cap E=1)}{\mbox{P}(E=1)} \\
+                  &= \left. \frac{n_{1,0}}{\cancel N} \middle/ 
+                            \frac{n_{1,\bullet}}{\cancel N} \right. \\
+                  &= \frac{n_{1,0}}{n_{1,\bullet}} \\[12pt]
+\end{aligned}
+$$
+\end{multicols}
+
+
+## Definition: Odds of $D$ given $E$
+
+\small
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the odds of event $D$ given exposure are
+
 $$
 \begin{aligned}
 odds(D=1|E=1) &= \frac{\mbox{P}(D=1|E=1)}{\mbox{P}(D=0|E=1)} \\
@@ -159,16 +198,70 @@ odds(D=1|E=1) &= \frac{\mbox{P}(D=1|E=1)}{\mbox{P}(D=0|E=1)} \\
               &= \frac{n_{1,1}}{n_{1,0}}
 \end{aligned}
 $$
-\\[-12pt] \columnbreak
+
+
+## Definition: Odds of $D$ given $!E$
+
+\small
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the odds of event $D$ given $no$ exposure are \vspace{-16pt}
+
+\begin{multicols}{2}
 $$
 \begin{aligned}
-odds(D=1|E=0) &= \frac{\mbox{P}(D=1|E=0)}{\mbox{P}(D=0|E=0)} \\
+\mbox{P}(D=1|E&=1) \\ 
+                  &= \frac{\mbox{P}(D=1 \cap E=0)}{\mbox{P}(E=0)} \\
+                  &= \left. \frac{n_{0,1}}{\cancel N} \middle/ 
+                            \frac{n_{0,\bullet}}{\cancel N} \right. \\
+                  &= \frac{n_{0,1}}{n_{0,\bullet}} \\
+\end{aligned}
+$$
+\\ \columnbreak
+$$
+\begin{aligned}
+\mbox{P}(D=0|E&=1) \\
+                  &= \frac{\mbox{P}(D=0 \cap E=1)}{\mbox{P}(E=1)} \\
+                  &= \left. \frac{n_{0,0}}{\cancel N} \middle/ 
+                            \frac{n_{0,\bullet}}{\cancel N} \right. \\
+                  &= \frac{n_{0,0}}{n_{0,\bullet}} \\[12pt]
+\end{aligned}
+$$
+\end{multicols}
+
+## Definition: Odds of $D$ given $!E$
+
+\small
+Given a disease outcome, $D$, an exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          &     $D = 1$     &    $D = 0$      &   row total     \\ \hline
+  $E = 1$ &    $n_{1,1}$    &   $n_{1,0}$     & $n_{1,\bullet}$ \\
+  $E = 0$ &    $n_{0,1}$    &   $n_{0,0}$     & $n_{0,\bullet}$ \\ \hline
+col total & $n_{\bullet,1}$ & $n_{\bullet,0}$ & $N$
+\end{tabular}
+\end{center}
+
+the odds of event $D$ given $no$ exposure are
+
+$$
+\begin{aligned}
+odds(D=1|E=1) &= \frac{\mbox{P}(D=1|E=0)}{\mbox{P}(D=0|E=0)} \\
               &= \left. \frac{n_{0,1}}{\cancel{n_{0,\bullet}}} \middle/ 
                         \frac{n_{0,0}}{\cancel{n_{0,\bullet}}}\right. \\
               &= \frac{n_{0,1}}{n_{0,0}}
 \end{aligned}
 $$
-\end{multicols}
 
 ## Definition: Odds Ratio
 
@@ -221,13 +314,49 @@ Given a disease outcome, $D$, and exposure, $E$, and
 \begin{center}
 \begin{tabular}{ r | c | c | c }
           & $D = 1$ & $D = 0$ & row total \\ \hline
-  $E = 1$ &    36   &    54   &           \\
-  $E = 0$ &    32   &    89   &           \\ \hline
-col total &         &         & 
+  $E = 1$ &    36   &    54   & {\it 90}  \\
+  $E = 0$ &    32   &    89   & {\it 121} \\ \hline
+col total & {\it 68}&{\it 143}& {\it 211}
 \end{tabular}
 \end{center}
 
 what is the OR and 95% CI for the exposure, $E$? Is this statistically significant?
+
+$$
+\begin{aligned}
+      OR(D|E) &= \frac{36*89}{32*54} \\
+              &= 1.85 \\
+      \log OR &= 0.617 \\
+se ( \log OR) &= \sqrt{\frac{1}{36} + \frac{1}{54} + \frac{1}{32} + \frac{1}{89}} \\
+              &= 0.298
+\end{aligned}
+$$
+
+
+## Putting everything together
+
+Given a disease outcome, $D$, and exposure, $E$, and
+
+\begin{center}
+\begin{tabular}{ r | c | c | c }
+          & $D = 1$ & $D = 0$ & row total \\ \hline
+  $E = 1$ &    36   &    54   & {\it 90}  \\
+  $E = 0$ &    32   &    89   & {\it 121} \\ \hline
+col total & {\it 68}&{\it 143}& {\it 211}
+\end{tabular}
+\end{center}
+
+what is the OR and 95% CI for the exposure, $E$? Is this statistically significant?
+
+$$
+\begin{aligned}
+              OR &= 1.85 \\
+95\%~CI(\log OR) &= 0.617 \pm 1.96*0.298 \\
+                 &= (0.031, 1.199) \\
+    95\%~CI (OR) &= (1.03, 3.32)
+\end{aligned}
+$$
+
 
 ## Logistic Regression: Review
 

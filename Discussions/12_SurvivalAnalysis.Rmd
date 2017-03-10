@@ -182,14 +182,12 @@ legend('topright', c('Grade=1', 'Grade=2', 'Grade=3'),
 
 ## Survival Analysis
 
-The analysis of survival until a particular event of interest needs to take 4 key measures into account:
+The analysis of survival until a particular event of interest needs to take 4 key measures into account (with definitions for the GBSG data set):
 
-- Target event
-- Time origin
-- Time Metric
-- Censoring Causes
-
-Define these measures for GBSG
+- Target event (recurrence of breast cancer)
+- Time origin (tumor resection)
+- Time Metric (years - continuous)
+- Censoring Causes (mostly at end of study? - would need to look more into this)
 
 ## Survival Analysis: Time Metric
 
@@ -224,7 +222,7 @@ $$
 
 The discrete survival function is the probability of surviving until time $t$ without the event occuring.
 
-$$ S(t) = \prod_{i=0}^t h(i) $$
+$$ S(t) = \prod_{i=0}^t 1 - h(i) $$
 
 ## Cox Proportional Hazards Model
 
