@@ -4,22 +4,31 @@
 require(ggplot2)
 require(broom)
 require(car)
+require(survival)
 
 # to do: add titles to figures, include model identifier as well
 testAssumptions <- function(model, allPlots = FALSE)
 {
   violations <- ""
   
+  survModel <- 'coxph' %in% class(model)
+  
   # Linear Relationship
-  if(allPlots)
+  if(allPlots & !survModel) ###### add martingale plot for coxph
       crPlots(model)
+  
+  if(survModel)
+  {
+    warning("Martingale plots for linearity check not yet implemented.")
+    # martingale_plots <- plot_grid(plotlist = plots)
+  }
   
   # Multivariate Normality
   GLMmodel <- !is.null(model$family) # model$family is null for lm
   if(GLMmodel)
     GLMmodel <- model$family$family != 'gaussian'
     
-  if(GLMmodel)
+  if(GLMmodel | survModel)
   {
     ShapiroWilks <- NULL
     qqplot <- NULL
@@ -57,14 +66,20 @@ testAssumptions <- function(model, allPlots = FALSE)
   }
   
   # Autocorrelation
-  DW <- durbinWatsonTest(model)
+  if(!survModel)
+  {
+    DW <- durbinWatsonTest(model)
+    
+    if(DW$p < 0.05)
+        violations <- paste0(violations, "Autocorrelation violation (p = ", 
+                             signif(DW$p, 2), ")\n")
+  }else{
+    DW <- NULL
+  }
   
-  if(DW$p < 0.05)
-    violations <- paste0(violations, "Autocorrelation violation (p = ", 
-                         signif(DW$p, 2), ")\n")
   
   # Homoscedasticity
-  if(GLMmodel)
+  if(GLMmodel | survModel)
   {
     ncv <- NULL
   }else{
@@ -75,32 +90,57 @@ testAssumptions <- function(model, allPlots = FALSE)
                            signif(ncv$p, 2), ")\n")
   }
   
-  spreadLevel <- augment(model) %>%
-    ggplot(aes(.fitted, abs(.std.resid))) +
-    geom_point(alpha = 0.3) +
-    geom_smooth(se = FALSE, color = 'gold3', linetype = 2, size = 1.5) +
-    geom_smooth(method = 'lm', se = FALSE)
+  if(survModel)
+  {
+    spreadLevel <- NULL
+  }else{
+    spreadLevel <- augment(model) %>%
+      ggplot(aes(.fitted, abs(.std.resid))) +
+      geom_point(alpha = 0.3) +
+      geom_smooth(se = FALSE, color = 'gold3', linetype = 2, size = 1.5) +
+      geom_smooth(method = 'lm', se = FALSE)
+  }
   
   
   # Outliers/Leverage
-  tmp <- augment(model) %>%
-    mutate(id = 1:length(.fitted),
-           .p = 2*pnorm(abs(.std.resid), lower.tail = FALSE),
-           outlier = .p < 0.05 / sum(!is.na(.fitted)))
+  if(survModel)
+  {
+    outliers <- NULL
+    outlier_leverage <- NULL
+  }else{
+    tmp <- augment(model) %>%
+      mutate(id = 1:length(.fitted),
+             .p = 2*pnorm(abs(.std.resid), lower.tail = FALSE),
+             outlier = .p < 0.05 / sum(!is.na(.fitted)))
   
-  outliers <- filter(tmp, outlier) %>%
-    select(id, .std.resid, .p, .cooksd, .hat) %>%
-    arrange(.p)
+    outliers <- filter(tmp, outlier) %>%
+      select(id, .std.resid, .p, .cooksd, .hat) %>%
+      arrange(.p)
   
-  if(dim(outliers)[1] > 0)
-    violations <- paste0(violations, dim(outliers)[1], " outliers detected\n")
+    if(dim(outliers)[1] > 0)
+      violations <- paste0(violations, dim(outliers)[1], " outliers detected\n")
   
-  outlier_leverage <- ggplot(tmp, aes(.hat, .std.resid, size = .cooksd)) +
-    geom_point(alpha = 0.3) +
-    geom_text(aes(label = ifelse(outlier, id, '')))
+    outlier_leverage <- ggplot(tmp, aes(.hat, .std.resid, size = .cooksd)) +
+      geom_point(alpha = 0.3) +
+      geom_text(aes(label = ifelse(outlier, id, '')))
+  }
+  
+  
+  # Cox Proportionality
+  if(survModel)
+  {
+    cox_proportionality <- cox.zph(model)
+    
+    if(cox_proportionality$table['GLOBAL', 'p'] < 0.05)
+      violations <- paste0(violations, "Proportional hazards assumption violated (p = ", 
+                        signif(cox_proportionality$table['GLOBAL', 'p'], 2),
+                        ")\n")
+  }else{
+    cox_proportionality <- NULL  
+  }
   
   # Predictor Influence
-  if(allPlots)
+  if(allPlots & !survModel)
       avPlots(model)
   
   if(nchar(violations) > 0)
