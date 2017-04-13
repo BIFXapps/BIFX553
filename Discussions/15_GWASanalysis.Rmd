@@ -1,0 +1,247 @@
+---
+title: "Modeling Genetic Traits"
+author: "Randy Johnson"
+date: "4/13/2017"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(cowplot)
+library(broom)
+library(ggplot2)
+
+theme_update(text = element_text(size = 20))
+
+# colorblind palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+## Setup
+
+\small
+```{r, eval = FALSE, echo = TRUE}
+library(tidyverse)
+library(cowplot)
+library(broom)
+library(ggplot2)
+
+theme_update(text = element_text(size = 20))
+
+# colorblind palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", 
+                "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+## Sample data set
+
+We aren't going to analyze these exact data, but this is what the each dataset will look like.
+
+```{r modeling data}
+n <- 400
+set.seed(2893) # we aren't really going to analyze these data,
+               # but this will give us an idea of what they look like
+(dat <- data_frame(cont = rnorm(n),
+                  cat = rbinom(n, 1, 0.5),
+                  a = rbinom(n, 2, 0.4)))
+```
+
+## Additive traits
+
+- Definition: The effect of each phenotype influencing variant changes the phenotype by an equal ammount for each inherited allele. Example: human skin color. It is unknown how many genes affect human skin color, but additivity is fairly well established.
+
+```{r additive data}
+set.seed(3945872)
+dat <- data_frame(a = rbinom(n, 2, 0.4),
+                  cat = rbinom(n, 1, ifelse(a == 0, 0.5,
+                                     ifelse(a == 1, 0.667, 0.75))),
+                  cont = rnorm(n, ifelse(a == 0, 0,
+                                  ifelse(a == 1, 1.5, 3))))
+```
+
+```{r additive model, echo = TRUE}
+glm(cat ~ (a == 1) + (a == 2), data = dat, family = binomial) %>%
+    tidy() %>%
+    mutate(OR = exp(estimate)) %>%
+    select(term, OR, p.value)
+```
+
+## Multiplicitive traits
+
+- Definition: The effect of each phenotype influencing variant changes the phenotype by a constant multiplier. For example, if one allele increases gene expression by 2 fold, two alleles will increase gene expression by 4 fold. Example: Hemoglobin A/S. Individuals with with a heterozygous hemoglobin phenotype (i.e. they have one A gene and one S gene) will experience very slight symptoms similar to sickle cell anemia. Individuals with two hemoglobin S genes will present with sickle cell disease. The effect of having two alleles is worse than double the symptoms in heterozygous individuals.
+
+```{r multiplicitive data}
+set.seed(394587)
+dat <- data_frame(a = rbinom(n, 2, 0.4),
+                  cat = rbinom(n, 1, ifelse(a == 0, 0.5,
+                                     ifelse(a == 1, 0.667, 0.8))),
+                  cont = rnorm(n, ifelse(a == 0, 0,
+                                  ifelse(a == 1, 2, 4))))
+```
+
+\small
+```{r multiplicitive model, echo = TRUE}
+glm(cat ~ a, data = dat, family = binomial) %>%
+    tidy() %>%
+    mutate(OR = exp(estimate)) %>%
+    select(term, OR, p.value)
+```
+
+## Multiplicitive traits
+
+This is often called an additive model within the context of logistic regression, because at the log Odds scale, it is additive. At the OR scale, however, it is multiplicitive. Be sure to be very clear when defining your terms in the methods section.
+
+- log Odds scale
+$$ 
+\begin{aligned}
+\log(OR_1|a=1) &=   \beta_1 \\
+\log(OR_1|a=2) &= 2*\beta_1 \\
+               &= \beta_1 + \beta_1
+\end{aligned}
+$$
+
+- Odds Ratio (OR) scale
+$$
+\begin{aligned}
+(OR_1|a=1) &= e^{\beta_1} \\
+(OR_1|a=2) &= e^{\beta_1 + \beta_1} \\
+           &= e^{\beta_1} * e^{\beta_1}
+\end{aligned}
+$$
+
+## Dominant traits
+
+- Definition: The phenotype is observed if there are one or two variants. Example:  Polydactyly (extra fingers and toes) is a dominant trait caused by one of a number of different genes (e.g. GLI3). The allele frequency is about 2%.
+
+```{r dominant data}
+set.seed(394587)
+dat <- data_frame(a = rbinom(n, 2, 0.4),
+                  cat = rbinom(n, 1, ifelse(a == 0, 0.5, 0.667)),
+                  cont = rnorm(n, ifelse(a == 0, 0, 1.5)))
+```
+
+```{r dominant model, echo = TRUE}
+glm(cat ~ (a > 0), data = dat, family = binomial) %>%
+    tidy() %>%
+    mutate(OR = exp(estimate)) %>%
+    select(term, OR, p.value)
+```
+
+## Recessive traits
+
+- Definition: The phenotype is observed only if there are two variant alleles. Example: CCR5 $\Delta$ 32 homozygosity provides near perfect protection against HIV infection.
+
+```{r recessive data}
+set.seed(394587)
+dat <- data_frame(a = rbinom(n, 2, 0.4),
+                  cat = rbinom(n, 1, ifelse(a == 2, 0.667, 0.5)),
+                  cont = rnorm(n, ifelse(a == 2, 1.5, 0)))
+```
+
+```{r recessive model, echo = TRUE}
+glm(cat ~ (a == 2), data = dat, family = binomial) %>%
+    tidy() %>%
+    mutate(OR = exp(estimate)) %>%
+    select(term, OR, p.value)
+```
+
+## X-linked traits
+
+- Definition: Genes with recessive traits that are found on the X chromosome are X-linked. Males have only one X chromosome, so the presence of a recessive gene will not be compensated for by another chromosome inherited from the father. Because the gene is located on the X chromosome, males are more likely to be affected. Example: Hemophilia. Females with only one defective FVIII or FIX gene will still produce functional clotting factors in the blood stream, and the phenotype is not observed.
+
+```{r xlinked data}
+set.seed(394587)
+dat <- data_frame(male = rbinom(n, 1, 0.5),
+                  a = rbinom(n, ifelse(male, 1, 2), 0.4),
+                  cat = rbinom(n, 1, ifelse(a == 2 | (a == 1 & male), 0.667, 0.5)),
+                  cont = rnorm(n, ifelse(a == 2 | (a == 1 & male), 1.5, 0)))
+```
+
+\small
+```{r xlinked model, echo = TRUE}
+glm(cat ~ dummy, family = binomial,
+    data = mutate(dat, dummy = a == 2 | 
+                              (a == 1 & male))) %>%
+    tidy() %>% 
+    mutate(OR = exp(estimate)) %>%
+    select(term, OR, p.value)
+```
+
+## Asside: Mosaic traits
+
+- Definition: This is another type of X-linked trait, affecting females. In females, one X chromosome is essentially deactivated and forms what is called a Barr body. This happens relatively early in the development of the unborn offspring, and clonal expansions of daughter cells, all with the same X chromosome Barr body, will result in patches of similar X chromosome characteristics. Thus a gene affecting phenotype may be observable in patches. Example: Orange/black coat color in cats. Tortiseshell and Calico cats are always female.
+    
+- Power when you are right/wrong
+- Power under different minor allele frequencies
+
+## Background: Power
+
+- By the Central Limit Theorem (CLT), the mean of your observed test distribution will be closer to the actual population mean as the sample size increases.
+- By the Law of Large Numbers (LLN), the variance of your test distribution will get smaller as the sample size increases.
+
+```{r sample distribution, fig.height=4}
+data_frame(x = seq(from = -2, to = 2, length = 300),
+           y1 = dnorm(x, sd = 1/sqrt(3)), # sample size of 3
+           y2 = dnorm(x, sd = 1/sqrt(50))) %>% # sample size of 50
+    ggplot() + 
+    geom_line(aes(x, y1, linetype = 'n3')) +
+    geom_line(aes(x, y2, linetype = 'n50')) +
+    ylab("") +
+    scale_linetype_manual(name = '', values = c(n3 = 1, n50 = 2), 
+                          labels = c('n = 3', 'n = 50')) +
+    theme(axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank())
+```
+
+## Background: Power
+
+The concept of statistical power comes into play when there is a null hypothesis to compare our test statistic against.
+
+```{r population distn, fig.height=4}
+data_frame(x = seq(from = -3, to = 4, length = 300),
+           null = dnorm(x),
+           alt = dnorm(x, mean = 1),
+           altFill = ifelse(abs(x) > 1.96, alt, 0)) %>%
+    ggplot() + 
+    geom_line(aes(x, null, linetype = 'null')) +
+    geom_line(aes(x, alt, linetype = 'alt')) +
+    geom_area(aes(x, altFill), fill = rgb(0.2, 0.2, 0.2), alpha = 0.2) +
+    ylab("") +
+    scale_linetype_manual(name = '', values = c(null = 1, alt = 2), 
+                          labels = c(null = 'Ho', alt = 'Actual')) +
+    scale_x_continuous(breaks = c(-1.96, 1.96), labels = c("-2 SE", "2 SE")) +
+    theme(axis.text.y=element_blank(),
+          axis.ticks.y=element_blank())
+```
+
+Given these sampling distributions, what is the probability that we correctly reject the null hypothesis? This is statistical power.
+
+## Background: Power and Sample Size
+
+Now, we can increase the probability of correctly rejecting the null hypothesis if we increase the sample size.
+
+- Why? Because the CLT and LLN are our friends!
+
+```{r power, fig.height=4}
+data_frame(x = seq(from = -3, to = 4, length = 300),
+           null = dnorm(x, sd = 1/sqrt(20)),
+           alt = dnorm(x, mean = 1, sd = 1/sqrt(20)),
+           altFill = ifelse(abs(x) > 1.96 / sqrt(20), alt, 0)) %>%
+    ggplot() + 
+    geom_line(aes(x, null, linetype = 'null')) +
+    geom_line(aes(x, alt, linetype = 'alt')) +
+    geom_area(aes(x, altFill), fill = rgb(0.2, 0.2, 0.2), alpha = 0.2) +
+    ylab("") +
+    scale_linetype_manual(name = '', values = c(null = 1, alt = 2), 
+                          labels = c(null = 'Ho', alt = 'Actual')) +
+    scale_x_continuous(breaks = c(-1.96, 1.96) / sqrt(20), labels = c("-2 SE", "2 SE")) +
+    theme(axis.text.y=element_blank(),
+          axis.ticks.y=element_blank())
+```
+
+## Power of Genetic Models

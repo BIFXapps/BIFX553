@@ -11,6 +11,8 @@ header-includes:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(GWASTools)
+library(SNPRelate)
 library(tidyverse)
 library(cowplot)
 library(hwde)
@@ -28,6 +30,8 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73",
 \small
 ```{r setup slide, eval = FALSE, echo = TRUE}
 knitr::opts_chunk$set(echo = FALSE)
+library(GWASTools)
+library(SNPRelate)
 library(tidyverse)
 library(cowplot)
 library(hwde)
@@ -603,6 +607,48 @@ for(i in 1:dim(dat)[1]) # probably a more elegant way to do this, but...
 }
 ggplot(dat, aes(Z0, Z1)) +
     geom_jitter(height = 0.025, width = 0.025)
+```
+
+## Population Structure
+
+\small
+```{r calculate eigs, eval = FALSE, echo = TRUE}
+# start by merging files
+snpgdsCombineGeno(paste0('~/Documents/HapMap3/gds/', 
+                         c('ASW', 'CEU', 'YRI'), '.gds'),
+                  '~/Documents/HapMap3/gds/popStruct.gds',
+                  name.prefix = c('ASW', 'CEU', 'YRI'))
+
+# open new file
+all <- snpgdsOpen('~/Documents/HapMap3/gds/popStruct.gds')
+
+# calculate eigenvectors
+structr <- snpgdsPCA(all)
+save(structr, file = '../Data/13_structr.RData')
+
+# close file
+snpgdsClose(all)
+```
+
+## Population Structure
+
+```{r popstructure plot code, echo = TRUE}
+load('../Data/13_structr.RData')
+
+g <- data_frame(eig1 = structr$eigenvect[,1],
+                eig2 = structr$eigenvect[,2],
+                pop = {strsplit(structr$sample.id, '.', 
+                                fixed = TRUE) %>%
+                       sapply(`[`, 1)}) %>%
+     ggplot(aes(eig1, eig2, color = pop)) +
+     geom_point() +
+     scale_color_manual(values = cbbPalette)
+```
+
+## Population Structure
+
+```{r popstructure plot}
+g
 ```
 
 ## B Allele Plots
