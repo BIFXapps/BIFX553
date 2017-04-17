@@ -448,10 +448,10 @@ If we flip sample $B$ to the other strand we get an allele frequency of 0.19, wh
 
 ## Allele Flips: Solution
 
-If you aren't merging multiple samples, this shouldn't be a problem. Also, if you don't identify any allele flips in A/C or G/T SNPs while merging multiple samples, there probably aren't any allele flips in A/G or C/T SNPs (this isn't a guaruntee, though).
+If you aren't merging multiple samples, this shouldn't be a problem. Also, if you don't identify any allele flips in A/T or C/G SNPs while merging multiple samples, there probably aren't any allele flips in A/T or C/G SNPs (this isn't a guaruntee, though).
 
 - If neither of those is true, you can check for allele flips using the `--flip-scan` module in PLINK.
-- This works by scanning all potential allele flips (i.e. C/T and A/G SNPs) for inconsistent linkage disequilibrium between cases and controls. Thus, you may need to create a dummy case/control variable that correspnods to the sample ID for this test.
+- This works by scanning all potential allele flips (i.e. A/T and C/G SNPs) for inconsistent linkage disequilibrium between cases and controls. Thus, you may need to create a dummy case/control variable that correspnods to the sample ID for this test.
 
 ```{r allele flips, eval = FALSE, echo = TRUE}
 plink --bfile mydata --flip-scan
