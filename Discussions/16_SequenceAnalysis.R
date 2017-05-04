@@ -8,8 +8,9 @@
 
 ######### load/install packages where we want them #########
 # start by resetting the default library path for installation and loading packages
+# this will load and install packages to the removable thumb drive
 .libPaths(c("/Volumes/MASTER/MacLibs", .libPaths())) # for OS X
-# .libPaths(c("", .libpaths())) # for Windows
+# .libPaths(c("F:/WinLibs", .libpaths())) # for Windows
 
 source("https://bioconductor.org/biocLite.R")
 
