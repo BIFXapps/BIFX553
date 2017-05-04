@@ -9,8 +9,8 @@
 ######### load/install packages where we want them #########
 # start by resetting the default library path for installation and loading packages
 # this will load and install packages to the removable thumb drive
-.libPaths(c("/Volumes/MASTER/MacLibs", .libPaths())) # for OS X
-# .libPaths(c("F:/WinLibs", .libpaths())) # for Windows
+.libPaths(c("/Volumes/KINGSTON/MacLibs", .libPaths())) # for OS X
+# .libPaths(c("F:/WinLibs", .libPaths())) # for Windows
 
 source("https://bioconductor.org/biocLite.R")
 
@@ -26,7 +26,7 @@ install.required <- function(pkg, bioc = FALSE)
 
     if(failedLoad & bioc)
     {
-        biocLite(pkg)
+        biocLite(pkg, suppressAutoUpdate = TRUE)
         eval(parse(text = paste0('library(', pkg, ')')))
     }
 }
@@ -42,12 +42,12 @@ install.required("ReportingTools", bioc = TRUE)
 install.required("Gviz", bioc = TRUE)
 install.required("sva", bioc = TRUE)
 install.required("fission", bioc = TRUE)
+install.required("genefilter", bioc = TRUE)
 install.required("tidyverse")
 install.required("magrittr")
 install.required("ggplot2")
 install.required("pheatmap")
 install.required("RColorBrewer")
-install.required("genefilter")
 
 
 ######### Now run the tutorial #########
