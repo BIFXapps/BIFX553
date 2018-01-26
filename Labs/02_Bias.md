@@ -145,35 +145,35 @@ Do the following:
     # look at vitamins data set
     vitamins
 
-    ## # A tibble: 200 x 11
+    ## # A tibble: 300 x 11
     ##    mlti99 supr99 mlti18 supr18 cancer mlti_… supr… lowR… high… obsL… obsH…
     ##     <int>  <int>  <int>  <int>  <int>  <int> <int> <lgl> <lgl> <lgl> <lgl>
-    ##  1      0      1      0      1      0      0     1 F     T     F     T    
-    ##  2      0      1      0      1      1      0     0 F     T     F     F    
-    ##  3      1      0      1      0      0      1     1 T     F     F     F    
+    ##  1      0      0      0      0      0      0     0 T     F     T     F    
+    ##  2      0      1      0      1      1      1     1 F     T     F     T    
+    ##  3      1      0      0      0      0      1     1 T     F     F     F    
     ##  4      0      1      0      1      0      0     1 F     T     F     T    
-    ##  5      1      0      1      0      0      1     0 T     F     T     F    
-    ##  6      0      1      0      1      0      0     1 F     T     F     T    
-    ##  7      0      0      0      0      0      0     0 T     F     T     F    
-    ##  8      0      1      0      1      0      0     1 F     T     F     T    
-    ##  9      0      1      0      1      0      0     1 F     T     F     T    
-    ## 10      0      0      0      1      0      0     0 F     F     F     F    
-    ## # ... with 190 more rows
+    ##  5      1      0      0      0      0      0     1 T     F     F     F    
+    ##  6      0      0      0      0      0      0     1 T     F     F     F    
+    ##  7      0      1      0      1      0      0     1 F     T     F     T    
+    ##  8      0      0      0      0      0      0     0 T     F     T     F    
+    ##  9      0      0      0      0      0      0     0 T     F     T     F    
+    ## 10      0      0      0      1      1      0     0 F     F     F     F    
+    ## # ... with 290 more rows
 
     # compare tables
     with(vitamins, table(supr99, supr18)) / n
 
     ##       supr18
-    ## supr99     0     1
-    ##      0 0.765 0.045
-    ##      1 0.005 0.185
+    ## supr99           0           1
+    ##      0 0.740000000 0.056666667
+    ##      1 0.006666667 0.196666667
 
     with(vitamins, table(supr_recall, supr18)) / n
 
     ##            supr18
-    ## supr_recall    0    1
-    ##           0 0.54 0.07
-    ##           1 0.23 0.16
+    ## supr_recall          0          1
+    ##           0 0.58666667 0.06333333
+    ##           1 0.16000000 0.19000000
 
     # compare statistics for low risk and high risk groups
     with(filter(vitamins, lowRisk | highRisk),
@@ -186,13 +186,13 @@ Do the following:
     ##  correction
     ## 
     ## data:  .
-    ## X-squared = 4.3756, df = 1, p-value = 0.03646
+    ## X-squared = 4.4503, df = 1, p-value = 0.0349
     ## alternative hypothesis: two.sided
     ## 95 percent confidence interval:
-    ##  -0.01608845  0.32133487
+    ##  -0.003072552  0.277770979
     ## sample estimates:
     ##    prop 1    prop 2 
-    ## 0.2702703 0.1176471
+    ## 0.3220339 0.1846847
 
     # compare statistics for observed low risk and observed high risk groups
     with(filter(vitamins, obsLow | obsHigh),
@@ -200,20 +200,18 @@ Do the following:
          table(obsLow, cancer)[,2:1]) %>% 
          prop.test()
 
-    ## Warning in prop.test(.): Chi-squared approximation may be incorrect
-
     ## 
     ##  2-sample test for equality of proportions with continuity
     ##  correction
     ## 
     ## data:  .
-    ## X-squared = 0.46243, df = 1, p-value = 0.4965
+    ## X-squared = 7.8937, df = 1, p-value = 0.004961
     ## alternative hypothesis: two.sided
     ## 95 percent confidence interval:
-    ##  -0.1016319  0.2358911
+    ##  0.03901602 0.33319291
     ## sample estimates:
     ##    prop 1    prop 2 
-    ## 0.1875000 0.1203704
+    ## 0.3508772 0.1647727
 
 ### Collider stratification bias
 
@@ -228,12 +226,5 @@ decreased infant mortality.
 -   Draw a DAG of this model.
 -   Simulate a data set that replicates the findings of the Whitcomb
     paper.
-    -   Assume that babies born to mothers who smoke have a 1% mortality
-        rate.
-    -   Assume that other under-weight babies in the data set have other
-        unmeasured conditions that result in 5% mortality rate.
-    -   Assume all babies sampled are under-weight, and 30% are born to
-        mothers who smoke.
-    -   Make your sample size 10,000.
 -   How would your findings change if you were missing key variables
     from this analysis?
