@@ -1,0 +1,97 @@
+---
+title: "Missing Data"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(missForest)
+```
+
+## Practice with Fish
+
+Analyze the fish data set and develop a model to predict the number of fish caught by a group. Include two files:
+
+* one with your exploratory analysis that includes all of the gory details of all the models you explored, and
+* one with your final solution and discussion of the results.
+
+The fish data set has the following variables:
+
+* fish_caught: total number of fish caught by the group
+* livebait: binary flag indicating that the group used live bait
+* camper: binary flag indicating that the group was camping at the lake
+* persons: the number of people in the group
+* child: the number of children in the group
+* hours: the numer of hours the group spent fishing
+
+```{r cp data, message=FALSE}
+require(readr)
+require(dplyr)
+# I'm purposely leaving out set.seed to see what different outcomes we get during class
+fish <- read_delim('https://raw.githubusercontent.com/rmcelreath/rethinking/master/data/Fish.csv', delim = ';') %>%
+        mutate(hours = ifelse(rbinom(length(hours), 1, 0.1), NA, hours), # missing completely at random
+               child = ifelse(rbinom(length(child), 1, ifelse(persons > 1, .13, 0)), NA, child)) # not MCAR -- possibly informative
+
+```
+
+```{r cp exploratory, eval=FALSE, include=FALSE}
+library(tidyverse)
+library(broom)
+library(car)
+library(gmodels)
+library(missForest)
+
+# impute missing data
+fish <- (as.data.frame(fish) %>%
+         missForest())$ximp %>%
+         as_data_frame()
+
+# my exploratory analysis
+summary(fish)
+
+fish <- mutate(fish, 
+               hoursCat = factor(ifelse(hours < 5, '<5',
+                                 ifelse(hours < 10, '5-10',
+                                 ifelse(hours < 15, '10-15',
+                                 ifelse(hours < 20, '15-20', '>20')))),
+                                 levels = c('<5', '5-10', '10-15', '15-20', '>20'),
+                                 ordered = TRUE),
+               lfish_caught = log(fish_caught + 0.1))
+
+ggplot(fish, aes(hoursCat, fish_caught + .1, color = persons)) +
+    geom_point() +
+    scale_y_log10() +
+    geom_smooth()
+
+# models
+lm0 <- lm(fish_caught ~ hoursCat + livebait + camper + persons + child, data = fish) # really bad normality and ncv assumptions
+lm1 <- update(lm0, log(fish_caught+0.1) ~ .) # better with normality/ncv assumptions, but not perfect
+lm2 <- update(lm1, . ~ . - hoursCat) # no evidence of hoursCat being important - assumptions ever so slightly better
+lm3 <- update(lm2, data = fish[-c(138, 123, 125),]) # not enough of a difference, leave them in
+
+anova(lm1, lm2)
+
+# assumptions
+crPlots(lm3)
+with(augment(lm3), shapiro.test(.std.resid))
+qqPlot(lm3)
+vif(lm2)
+ncvTest(lm3)
+durbinWatsonTest(lm2)
+
+outlierTest(lm3)
+influencePlot(lm3)
+```
+
+```{r cp final, eval=FALSE, include=FALSE}
+# final solution
+
+lmf <- lm(lfish_caught ~ livebait + camper + persons + child, data = fish)
+
+summary(lmf)
+
+ci(lmf)
+
+exp(ci(lmf)[,1:3])
+```
