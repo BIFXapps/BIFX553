@@ -1,0 +1,125 @@
+---
+title: "Transformations"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(cowplot)
+library(ggExtra)
+
+# use 500 samples by default for all examples
+n <- 500
+```
+
+# Transormations
+
+In this lab we will explore different data transformations that you may find useful in helping your data meet the linearity assumption.
+
+## Identity
+
+`identity()` doesn't really transform the data, but we'll start here to illustrate how we will proceed with the rest of the transofmrations.
+
+```{r identity}
+# create the raw data
+set.seed(293487)
+dat <- data_frame(x = rnorm(n),
+                  y = identity(x) + rnorm(n, sd = 0.5))
+
+{ggplot(dat, aes(x, y)) + 
+        geom_point() +
+        geom_smooth() + # untransformed
+        geom_smooth(method = 'lm', formula = identity(y) ~ x, color = 'orange')} %>% # transformed
+    ggMarginal(type = 'histogram')
+```
+
+## Polynomial
+
+A polynomial transformation is a sum of the variable raised to non-negative powers. The largest power that the variable is raised to is the degree of the polynomial transformation. For example, second degree polynomial transformations could be:
+
+y + y^^2
+
+y^^2
+
+### Quadratic
+
+#### `y^2` or `sqrt(x)`
+
+```{r quadratic1, eval = FALSE}
+set.seed(293478)
+dat <- data_frame(x = rnorm(n, 3.5),
+                  y = transformation(x + rnorm(n, sd = 0.5)))
+```
+
+#### `sqrt(y)` or `x^2`
+
+```{r quadratic2, eval = FALSE}
+set.seed(23048)
+dat <- data_frame(x = rnorm(n, 4),
+                  y = transformation(x) + rnorm(n, sd = 2))
+```
+
+### Cubic
+
+#### `y^3` or `x^(1/3)`
+
+```{r cubic1, eval = FALSE}
+set.seed(234786)
+dat <- data_frame(x = rnorm(n, 4),
+                  y = transformation(x) + rnorm(n, sd = 0.05))
+```
+
+#### `y^(1/3)` or `x^3`
+
+```{r cubic2, eval = FALSE}
+set.seed(239487)
+dat <- data_frame(x = rnorm(n),
+                  y = transformation(x) + rnorm(n))
+```
+
+## Exponential
+
+### `log(y)` or `exp(x)`
+
+```{r exp1, eval = FALSE}
+set.seed(293847)
+dat <- data_frame(x = rnorm(n),
+                  y = transformation(x) + rnorm(n))
+```
+
+### `exp(y)` or `log(x)`
+
+```{r exp2, eval = FALSE}
+set.seed(293847)
+dat <- data_frame(x = rnorm(n, 4),
+                  y = transofrmation(x) + rnorm(n, sd = 0.1))
+```
+
+## Logistic
+
+```{r logisitc, eval = FALSE}
+set.seed(239487)
+dat <- data_frame(x = rnorm(n),
+                  py = 1 / (1 + exp(-(x + rnorm(n, sd = 0.1)))),
+                  y = rbinom(n, 1, py))
+
+ggplot(dat, aes(x, y)) +
+    geom_point() +
+    geom_smooth() +
+    geom_smooth(method = 'glm', formula = y ~ x, method.args = list(family = 'binomial'), color = 'orange') +
+    geom_point(aes(dat$x, dat$py), color = rgb(0,0,0,.1))
+```
+
+# Practice
+
+For each of the data sets loaded by this script, pick the best transformation for `y`.
+
+```{r practice}
+source('https://tinyurl.com/y9kau2jt')
+```
+
+* dat1: 
+* dat2: 
+* dat3:
+* dat4: 
