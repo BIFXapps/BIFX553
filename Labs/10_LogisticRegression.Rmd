@@ -1,0 +1,26 @@
+---
+title: "Logistic Regression"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Introduction
+
+During this lab, we will analyze the [Medical Appointment No Shows data set from Kaggle](https://www.kaggle.com/joniarroba/noshowappointments). I've downloaded the data to this repository so we can load the data directly from this script. The data set has 15 variables and a little over 110,000 observations. It was used to find factors associated with people not showing up to meidcal appointments. See the Kaggle website if you have additional questions regarding the data, but it is fairly straight forward.
+
+## Data summary
+
+```{r import data}
+require(readr)
+
+if(file.exists('../Data/noshow_KaggleV2-May-2016.csv'))
+{
+    noshow <- read_csv('../Data/noshow_KaggleV2-May-2016.csv')
+}else{
+    noshow <- read_csv('https://github.com/BIFXapps/BIFX553/blob/master/Data/noshow_KaggleV2-May-2016.csv?raw=true')
+}
+```
