@@ -6,6 +6,10 @@ output: word_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(lubridate)
+library(cowplot)
+library(broom)
+library(separationplot)
 ```
 
 ## Introduction
@@ -14,13 +18,106 @@ During this lab, we will analyze the [Medical Appointment No Shows data set from
 
 ## Data summary
 
-```{r import data}
-require(readr)
+### Import the data
 
-if(file.exists('../Data/noshow_KaggleV2-May-2016.csv'))
+```{r import data}
+# if we have already created noshow, don't do this part again - it takes forever
+if(file.exists('noshow_preprocessed.RData'))
 {
-    noshow <- read_csv('../Data/noshow_KaggleV2-May-2016.csv')
+  load('noshow_preprocessed.RData')
 }else{
-    noshow <- read_csv('https://github.com/BIFXapps/BIFX553/blob/master/Data/noshow_KaggleV2-May-2016.csv?raw=true')
+
+  require(readr)
+
+  if(file.exists('../Data/noshow_KaggleV2-May-2016.csv'))
+  {
+      noshow <- read_csv('../Data/noshow_KaggleV2-May-2016.csv')
+  }else{
+      noshow <- read_csv('https://github.com/BIFXapps/BIFX553/blob/master/Data/noshow_KaggleV2-May-2016.csv?raw=true')
+  }
+
+  # do we have any duplicate patient ids?
+  length(unique(noshow$PatientId)) == dim(noshow)[1]
+  table(table(noshow$PatientId))
+  # there are ways to use all the rows of data here, but we will keep this anlysis simple and only include
+  # independent observations - that is, we will only keep one appointment per individual
+
+  # pick one appointment for each individual (this takes forever)
+  set.seed(23478)
+  
+  noshow$keep <- NA # this is how we will track which rows to keep
+  ids <- unique(noshow$PatientId) # this is all of the unique identifiers
+  
+  # loop over all rows in noshow (randomize order of the rows to remove possible time bias)
+  for(i in sample(1:dim(noshow)[1]))
+  {
+    # if we haven't encountered this individual, flag the row to keep
+    if(noshow$PatientId[i] %in% ids)
+    {
+      noshow$keep[i] <- TRUE
+      ids[ids == noshow$PatientId[i]] <- ''
+    }else{
+      # if we have encountered this individual, don't keep this row
+      noshow$keep[i] <- FALSE
+    }
+  }
+
+  # drop all rows that we decided to discard above
+  noshow <- filter(noshow, keep)
+
+  # add a few additional variables that we might find useful in our anlaysis
+  noshow <- mutate(noshow,
+                   noshow = as.integer(`No-show` == 'Yes'),
+                   scheduleLag = sapply(AppointmentDay - ScheduledDay, max, 0),
+                   female = as.integer(Gender == 'F'))
+
+  # save the dataset so we don't have to run this whole thing again!
+  save(noshow, file = 'noshow_preprocessed.RData')
 }
+```
+
+### Visual inspection of the data
+
+```{r visual inspection}
+ggplot(noshow, aes(Age, color = Gender)) +
+  geom_histogram()
+
+ggplot(noshow, aes(scheduleLag, color = Gender)) +
+  geom_histogram()
+
+with(noshow, table(noshow, Hipertension)) / dim(noshow)[1]
+```
+
+## Model selection
+
+```{r model selection}
+##### Models #####
+model0 <- glm(noshow ~ female + scheduleLag + SMS_received + Handcap + Alcoholism +
+                       Diabetes + Hipertension + Scholarship + Age + Neighbourhood,
+              data = noshow, family = binomial)
+
+model1 <- update(model0, . ~ . - Neighbourhood)
+
+
+##### separation plots #####
+require(separationplot)
+
+n <- 1000
+set.seed(9234)
+samp <- sample(1:dim(noshow)[1], size = n)
+
+separationplot(model0$data$noshow, predict(model0, type = 'response'), newplot = FALSE,
+               lwd1 = 0.01, lwd2 = 0.01, heading = 'Full Model - all rows')
+separationplot(model0$data$noshow[samp], predict(model0, type = 'response')[samp], newplot = FALSE,
+               heading = 'Full Model')
+
+##### ROC plots #####
+require(pROC)
+
+# full model - all rows
+(tmp <- roc(model0$data$noshow, predict(model0, type = 'response')))
+plot(tmp)
+# full model - sample of rows
+(tmp <- roc(model0$data$noshow[samp], predict(model0, type = 'response')[samp]))
+plot(tmp)
 ```
