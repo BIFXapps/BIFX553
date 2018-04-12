@@ -1,0 +1,69 @@
+---
+title: "Week 12 Lab"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sparkline)
+library(tidyverse)
+```
+
+# Introduction
+
+This week we will start out with a power calculation and then spend some more time practicing with logistic regression. Our data set for this week is a [cervical cancer data set from Kaggle](https://www.kaggle.com/loveall/cervical-cancer-risk-classification).
+
+# Data
+
+```{r import data, include = FALSE}
+##### Import data #####
+
+dat <- read_csv('../Data/kag_risk_factors_cervical_cancer.csv', na = '?')
+
+# this will make our code nicer later on
+names(dat) <- str_replace(names(dat), ": ?", "_") %>%
+              str_replace_all(" ", "_") %>%
+              str_replace_all("\\(|\\)", "") %>%
+              str_replace("packs/year", "packyears")
+
+# Notes:
+
+# Dx_CIN = Cervical intraepithelial neoplasia diagnosis
+
+# Hinselman = stereoscopic magnified view of the illuminated cervix, obtained with a binocular instrument mounted on a stand.
+
+# Schiller = Schiller's iodine solution is applied to the cervix under direct vision. Normal cervical mucosa contains glycogen and stains brown, whereas abnormal areas, such as early cervical cancer, do not take up the stain.
+
+# Citology = samples (either images or tissue from biopsy) sent to the lab for analysis by cytologist
+```
+
+Fill in the table below with summary statsitics for each variable. Also, we will dsiplay sparklines for our data. Is there anything else we should add to the table?
+
+```{r table setup, include = FALSE}
+# values for the mean (add more variables to include in the table
+mu <- list(Age = round(mean(dat$Age), 1),
+           HIV = round(mean(dat$STDs_HIV, na.rm = TRUE), 2))
+
+# values for the range (add more variables to include in the table
+range <- list(Age = range(dat$Age),
+              HIV = '0/1')
+```
+
+|     | Mean       | Range           | Distribution                                                     |
+|:---:|:----------:|:---------------:|:----------------------------------------------------------------:|
+| Age | `r mu$Age` | (`r range$Age`) | `r sparkline(hist(dat$Age, plot = FALSE)$density, type = 'bar')` |
+| HIV | `r mu$HIV` | `r range$HIV`   | `r sparkline(table(dat$STDs_HIV), type = 'bar')`                 |
+
+
+# Prediction
+
+Develop the best prediction model you can using logistic regression. Include separation and ROC figures.
+
+```{r exploration, include=FALSE}
+##### Exploratory analysis goes here #####
+# this is not shown in the final output, but the code is still run
+```
+
+```{r final model}
+##### Final model and related figures go here #####
+```
